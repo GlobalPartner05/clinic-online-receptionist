@@ -1,14 +1,61 @@
-export const CLINIC_HOURS = [
-  '09:00',
-  '10:00',
-  '11:00',
-  '12:00',
-  '13:00',
-  '14:00',
-  '15:00',
-  '16:00',
-  '17:00',
+/**
+ * SINGLE SOURCE OF TRUTH for opening hours. Everything that talks about hours or branches
+ * (slot lists, booking validation, receipts, chat answers) reads from here.
+ * Slots are hourly: the last bookable slot starts one hour before closing.
+ * Days use JS getUTCDay(): 0 = Sunday. A day in no branch's list is closed.
+ */
+export interface Branch {
+  id: string;
+  name: string;
+  address: string;
+  days: number[];
+  open: string; // HH:MM
+  close: string; // HH:MM
+  daysLabel: string;
+  hoursLabel: string;
+}
+
+export const BRANCHES: Branch[] = [
+  {
+    id: 'san-nicolas',
+    name: 'San Nicolas Branch',
+    address: 'Sta. Maria West, San Nicolas, Pangasinan',
+    days: [1, 2],
+    open: '09:00',
+    close: '18:00',
+    daysLabel: 'Mon-Tue',
+    hoursLabel: '9:00 AM - 6:00 PM',
+  },
+  {
+    id: 'project-6',
+    name: 'Project 6 Branch',
+    address: '111 – B2 Rd 3, Cor. Road 7, Project 6, Quezon City',
+    days: [3, 4, 5, 6],
+    open: '10:00',
+    close: '18:00',
+    daysLabel: 'Wed-Sat',
+    hoursLabel: '10:00 AM - 6:00 PM',
+  },
 ];
+
+function dayOfWeek(date: string): number {
+  const [y, m, d] = date.split('-').map(Number);
+  return new Date(Date.UTC(y, m - 1, d)).getUTCDay();
+}
+
+/** The branch open on this date, or null when the clinic is closed (Sunday). */
+export function branchOpenOn(date: string): Branch | null {
+  const day = dayOfWeek(date);
+  return BRANCHES.find((b) => b.days.includes(day)) ?? null;
+}
+
+function hourlySlots(open: string, close: string): string[] {
+  const out: string[] = [];
+  for (let h = Number(open.slice(0, 2)); h < Number(close.slice(0, 2)); h++) {
+    out.push(`${String(h).padStart(2, '0')}:00`);
+  }
+  return out;
+}
 
 export interface AppointmentRow {
   id: string;
@@ -43,13 +90,10 @@ export function assertValidTime(time: string): void {
   if (!TIME_RE.test(time)) throw new Error(`INVALID_TIME: ${time}`);
 }
 
-// Clinic hours per the spec: Mon-Fri 09:00-17:00, Sat 09:00-13:00, Sun closed.
+/** Bookable start times for a date (empty when closed). */
 export function clinicHoursFor(date: string): string[] {
-  const [y, m, d] = date.split('-').map(Number);
-  const day = new Date(Date.UTC(y, m - 1, d)).getUTCDay();
-  if (day === 0) return [];
-  if (day === 6) return CLINIC_HOURS.filter((t) => t <= '13:00');
-  return CLINIC_HOURS;
+  const b = branchOpenOn(date);
+  return b ? hourlySlots(b.open, b.close) : [];
 }
 
 export function withinClinicHours(date: string, time: string): boolean {

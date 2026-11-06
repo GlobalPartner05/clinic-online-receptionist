@@ -334,7 +334,7 @@ async function finishBooking(db: D1Database, d: Draft): Promise<ConverseResult> 
         : { reply: `Sorry, ${d.date} at ${t} is already taken. Please try another date.`, draft: { ...d, awaiting: 'date', date: undefined } as Draft };
     }
     if (m.startsWith('INVALID_')) {
-      return { reply: 'That date or time looks invalid. Clinic hours are 09:00-17:00 (Sat 09:00-13:00, Sun closed); please send a valid date and time.', draft: null };
+      return { reply: 'That date or time looks invalid. We are open Monday and Tuesday 9 AM to 6 PM in San Nicolas, and Wednesday to Saturday 10 AM to 6 PM at Project 6. We are closed on Sundays.', draft: null };
     }
     throw err;
   }

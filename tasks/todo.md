@@ -13,7 +13,7 @@ Security
 - [x] CSV export unescaped (quotes / formula injection) (fixed in web/)
 - [ ] Not fixed here (flag): /api/calls/* unsigned, Telegram webhook open without secret, no rate limit, phone-only identity
 Bugs
-- [ ] (DECISION NEEDED, backend untouched) Hours conflict: marketing (SN Mon-Tue 9-6, P6 Wed-Sat 10-6) vs `db.ts` (Mon-Fri 9-17, Sat 9-13); Sunday maps to Project 6
+- [x] (RESOLVED: `src/db.ts` BRANCHES is the one source; San Nicolas Mon-Tue 9-6, Project 6 Wed-Sat 10-6, Sun closed) Hours conflict: marketing (SN Mon-Tue 9-6, P6 Wed-Sat 10-6) vs `db.ts` (Mon-Fri 9-17, Sat 9-13); Sunday maps to Project 6
 - [x] Quick-chips now use phrasings the parser handles; original: Quick-chips send phrasing the regex parser cannot handle ("next Monday", "tomorrow at 10:00 AM")
 - [x] Voice call overwrites chat mic `onresult`; listening state sticks (fixed in web/)
 - [x] Hardcoded caller `+639170000001` shared by all web callers (fixed in web/)

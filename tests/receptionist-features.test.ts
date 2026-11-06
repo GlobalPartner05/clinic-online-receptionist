@@ -76,7 +76,7 @@ test('generateClinicReport aggregates stats across appointments', async () => {
     patientPhone: '09170000010',
     serviceType: 'cleaning',
     date: '2026-10-22',
-    time: '09:00',
+    time: '11:00',
   });
   await bookAppointment(db as never, {
     patientName: 'Patient 2',

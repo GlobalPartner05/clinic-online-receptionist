@@ -24,8 +24,8 @@ After editing, run `npm run build:web` and `npm run render:clips` (regenerates t
 ## 3. Backend strings to replace (find-and-replace; not yet config-driven)
 | File | What |
 |---|---|
-| `src/tools.ts` | `getBranchForDate` (branch names, addresses, which weekday maps to which branch); `SUYAT-` booking reference prefix (2 places) |
-| `src/db.ts` | `CLINIC_HOURS` and `clinicHoursFor` (bookable slots). **Keep these consistent with the branch hours shown on the site** |
+| `src/db.ts` | **`BRANCHES`: the single source of truth for branch names, addresses, open days and hours.** Slots, booking validation, receipts and the chat's hours/branch answers all read it. Keep it consistent with `BRANCHES` in `web/src/config/clinic.ts` (what the site shows) |
+| `src/tools.ts` | `SUYAT-` booking reference prefix (2 places) |
 | `src/chat.ts` | Welcome menu text and the hours wording in error messages |
 | `src/agent.ts` | `SYSTEM` prompt (clinic name, timezone, branches, hours) |
 | `src/calls.ts` | Spoken greeting, goodbye and the website name |
@@ -39,7 +39,7 @@ After editing, run `npm run build:web` and `npm run render:clips` (regenerates t
 Copy `.dev.vars.example` to `.dev.vars` for local work, and set the same names with `npx wrangler secret put <NAME>` for production: `ADMIN_PASSWORD` (required), `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`, `TELEGRAM_WEBHOOK_SECRET`, `RESEND_API_KEY`, `CLINIC_NOTIFICATION_EMAIL`, `VOICE_TOOL_SECRET` (only if using voice/), and optionally `BASE44_API_KEY`, `BASE44_AGENT_ID`, `BASE44_CONVERSATION_ID`. Never commit real values.
 
 ## 5. Before go-live
-- [ ] Opening hours: backend slots (`src/db.ts`) match the branch hours in `clinic.ts`.
+- [ ] Opening hours: `BRANCHES` in `src/db.ts` match `BRANCHES` in `web/src/config/clinic.ts` (the tests in `tests/tools.test.ts` pin the schedule; update them for the client).
 - [ ] Tests pass (`npm test`, `npm run test:web`) and `npm run build:web` is clean.
 - [ ] Contrast re-checked if colours changed (AA: 4.5:1 text, 3:1 UI).
 - [ ] Share image is a PNG/JPG, SEO head/schema/`llms.txt` updated for the client (see `work/<domain>/` for the Suyat example).

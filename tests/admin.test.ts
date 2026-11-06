@@ -313,7 +313,7 @@ test('reschedule outside clinic hours is 400', async () => {
     authed(db),
   );
   expect(sunday.status).toBe(400);
-  // Saturday afternoon: past 13:00
+  // Saturday before opening (Project 6 opens 10:00)
   const satAfternoon = await server.fetch(
     new Request(`http://localhost/api/admin/appointments/${id}`, {
       method: 'PATCH',
@@ -323,7 +323,7 @@ test('reschedule outside clinic hours is 400', async () => {
       },
       body: JSON.stringify({
         appointment_date: '2026-10-24',
-        appointment_time: '14:00',
+        appointment_time: '09:00',
       }),
     }),
     authed(db),

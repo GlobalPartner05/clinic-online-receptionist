@@ -7,6 +7,7 @@ import {
   getAppointmentReceipt,
   generateClinicReport,
 } from './tools.js';
+import { BRANCHES } from './db.js';
 import { converse, cleanDraft, type BookedSummary, type Draft } from './converse.js';
 import { allIsoDates, parseDate, parsePhone, parseService, parseTime, toSpeech } from './nlu.js';
 
@@ -34,7 +35,9 @@ export interface ChatResult {
 }
 
 const BRANCHES_TEXT =
-  'We have two branches: San Nicolas, Pangasinan (Sta. Maria West) open Monday and Tuesday, 9 AM to 6 PM, and Project 6, Quezon City (111 B2 Road 3 corner Road 7) open Wednesday to Saturday, 10 AM to 6 PM. After-hours appointments are available by prior arrangement.';
+  'We have two branches: ' +
+  BRANCHES.map((b) => `${b.name.replace(' Branch', '')} (${b.address}), open ${b.daysLabel.replace('-', ' to ')}, ${b.hoursLabel.replace(' - ', ' to ')}`).join(', and ') +
+  '. We are closed on Sundays. After-hours appointments are available by prior arrangement.';
 const SERVICES_TEXT =
   'We offer cleaning and checkups, restorations such as fillings, braces and consultations, teeth whitening, extractions, and urgent dental care. I can book any of these for you. I don\'t have prices to quote, our team will explain costs at your visit.';
 

@@ -80,39 +80,33 @@ test('rejects booking on Sunday (clinic closed)', async () => {
   ).rejects.toThrow('INVALID_TIME');
 });
 
-test('rejects Saturday booking after 13:00 but allows morning', async () => {
+test('Saturday (Project 6) is open 10:00-18:00, not before opening', async () => {
   const { bookAppointment } = await import('../src/tools');
   // 2026-10-24 is a Saturday
-  await expect(
-    bookAppointment(makeMockDb() as never, {
-      patientName: 'Ana',
-      patientPhone: '09170000001',
-      serviceType: 'cleaning',
-      date: '2026-10-24',
-      time: '14:00',
-    }),
-  ).rejects.toThrow('INVALID_TIME');
-  await expect(
-    bookAppointment(makeMockDb() as never, {
-      patientName: 'Ana',
-      patientPhone: '09170000001',
-      serviceType: 'cleaning',
-      date: '2026-10-24',
-      time: '10:00',
-    }),
-  ).resolves.toHaveProperty('id');
+  const base = { patientName: 'Ana', patientPhone: '09170000001', serviceType: 'cleaning', date: '2026-10-24' };
+  await expect(bookAppointment(makeMockDb() as never, { ...base, time: '09:00' })).rejects.toThrow('INVALID_TIME'); // before 10:00
+  await expect(bookAppointment(makeMockDb() as never, { ...base, time: '18:00' })).rejects.toThrow('INVALID_TIME'); // closing time
+  await expect(bookAppointment(makeMockDb() as never, { ...base, time: '10:00' })).resolves.toHaveProperty('id');
+  await expect(bookAppointment(makeMockDb() as never, { ...base, time: '17:00' })).resolves.toHaveProperty('id'); // afternoon now allowed
 });
 
-test('slots reflect day-of-week hours', async () => {
-  const { checkAvailableSlots } = await import('../src/tools');
+test('slots follow the published branch schedule, one source of truth', async () => {
+  const { checkAvailableSlots, getBranchForDate } = await import('../src/tools');
   const db = makeMockDb() as never;
-  // Sunday: closed entirely
-  await expect(checkAvailableSlots(db, '2026-10-25')).resolves.toEqual([]);
-  // Saturday: only up to 13:00
-  const sat = await checkAvailableSlots(db, '2026-10-24');
-  expect(sat).toContain('09:00');
-  expect(sat).toContain('13:00');
-  expect(sat).not.toContain('14:00');
+  const nine2five = ['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00'];
+  // Mon-Tue: San Nicolas 9-6
+  expect(await checkAvailableSlots(db, '2026-10-19')).toEqual(nine2five); // Monday
+  expect(await checkAvailableSlots(db, '2026-10-20')).toEqual(nine2five); // Tuesday
+  // Wed-Sat: Project 6 10-6
+  for (const d of ['2026-10-21', '2026-10-22', '2026-10-23', '2026-10-24']) {
+    expect(await checkAvailableSlots(db, d)).toEqual(nine2five.slice(1));
+  }
+  // Sunday closed
+  expect(await checkAvailableSlots(db, '2026-10-25')).toEqual([]);
+  // Branch matches the hours it was open
+  expect(getBranchForDate('2026-10-19').name).toBe('San Nicolas Branch');
+  expect(getBranchForDate('2026-10-21').name).toBe('Project 6 Branch');
+  expect(getBranchForDate('2026-10-21').address).toContain('Wed-Sat 10:00 AM - 6:00 PM');
 });
 
 test('cancel frees the slot for re-booking', async () => {
