@@ -1,0 +1,28 @@
+{
+  "name": "dental-ai-assistant",
+  "main": "src/server.ts",
+  "compatibility_date": "2026-10-15",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS"
+  },
+  "durable_objects": {
+    "bindings": [{ "name": "DentalAgent", "class_name": "DentalAgent" }]
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["DentalAgent"] }],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "dental-appointments-db",
+      "database_id": "502812cf-4b8a-49b2-a4e9-f0a3b0335efa"
+    }
+  ],
+  "ai": { "binding": "AI" },
+  "triggers": { "crons": ["0 0 * * *"] },
+  "observability": {
+    "enabled": true,
+    "logs": { "enabled": true },
+    "traces": { "enabled": true }
+  }
+}
