@@ -32,8 +32,11 @@ After editing, run `npm run build:web` and `npm run render:clips` (regenerates t
 | `skills/dental-receptionist/SKILL.md` | The skill description for the agent |
 | `tests/` | Update expectations that encode branch names, hours or the reference prefix |
 
+## 3b. Optional voice agent
+`voice/` holds the NVIDIA voice-agent overlay (prompt, tools, handlers) and `/api/voice/tool` in the Worker. Edit `voice/prompt.yaml` and `voice/tools.yaml` for the client; see `voice/README.md` for status and setup.
+
 ## 4. Secrets and environment
-Copy `.dev.vars.example` to `.dev.vars` for local work, and set the same names with `npx wrangler secret put <NAME>` for production: `ADMIN_PASSWORD` (required), `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`, `TELEGRAM_WEBHOOK_SECRET`, `RESEND_API_KEY`, `CLINIC_NOTIFICATION_EMAIL`, and optionally `BASE44_API_KEY`, `BASE44_AGENT_ID`, `BASE44_CONVERSATION_ID`. Never commit real values.
+Copy `.dev.vars.example` to `.dev.vars` for local work, and set the same names with `npx wrangler secret put <NAME>` for production: `ADMIN_PASSWORD` (required), `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`, `TELEGRAM_WEBHOOK_SECRET`, `RESEND_API_KEY`, `CLINIC_NOTIFICATION_EMAIL`, `VOICE_TOOL_SECRET` (only if using voice/), and optionally `BASE44_API_KEY`, `BASE44_AGENT_ID`, `BASE44_CONVERSATION_ID`. Never commit real values.
 
 ## 5. Before go-live
 - [ ] Opening hours: backend slots (`src/db.ts`) match the branch hours in `clinic.ts`.

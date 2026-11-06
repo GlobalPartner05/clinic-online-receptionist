@@ -16,6 +16,8 @@ import { runScheduled } from './scheduled.js';
 import { getAppointmentReceipt, generateClinicReport } from './tools.js';
 import { handleIncomingCall, handleCallProcess } from './calls.js';
 
+import { handleVoiceTool } from './voice.js';
+
 export { DentalAgent };
 
 export interface Env {
@@ -28,6 +30,7 @@ export interface Env {
   BASE44_API_KEY?: string;
   BASE44_AGENT_ID?: string;
   BASE44_CONVERSATION_ID?: string;
+  VOICE_TOOL_SECRET?: string;
 }
 
 async function handleChat(
@@ -279,6 +282,10 @@ export default {
       request.method === 'POST'
     ) {
       return handleChat(request, env, ctx);
+    }
+
+    if (url.pathname === '/api/voice/tool' && request.method === 'POST') {
+      return handleVoiceTool(request, env);
     }
 
     if (url.pathname === '/api/health') {

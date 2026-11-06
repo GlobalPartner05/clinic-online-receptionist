@@ -39,3 +39,10 @@ Dead code
 - Phase 4 partial: only Base44 secrets moved to env. Hours/branch single-source NOT changed (tests encode backend hours as spec; product decision).
 - Not done / flagged: Twilio signature check, rate limiting, phone-only identity, Telegram secret enforcement, stray root logs/PDFs/vendored `digital-health-skills/`.
 - Logo: repo PNG had an opaque gray background; replaced by live SVG/text lockup (`web/src/components/Logo.tsx`). Drop in an official transparent logo to replace.
+
+## Voice agent (NVIDIA skill) — scaffold
+- [x] Worker `/api/voice/tool` (bearer secret, fails closed, 4 tools, spoken-format replies) + 5 tests
+- [x] `voice/` prompt, tools, Python handlers (+5 tests), expected-conversation, README
+- [x] End-to-end: Python handlers vs local Worker (book/dup/reschedule/cancel/wrong secret)
+- [ ] NOT DONE: apply to NVA checkout, Docker start, live LLM validation, real mic test (needs NVIDIA_API_KEY + host + browser)
+- [ ] Before production: caller verification, rate limit, consent/retention, resolve backend-vs-site hours
