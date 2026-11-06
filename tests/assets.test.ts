@@ -16,7 +16,10 @@ import server from '../src/server';
 import { makeMockDb } from './mockdb';
 
 const here = dirname(fileURLToPath(import.meta.url));
-const publicFile = (name: string) => resolve(here, '../public', name);
+const webFile = (name: string) => resolve(here, '../web', name);
+// Static assets for the worker mock: index.html at web root, redirect stubs in web/public.
+const publicFile = (name: string) =>
+  name === 'index.html' ? webFile('index.html') : webFile(`public/${name}`);
 
 const env = {
   DB: makeMockDb(),
@@ -34,15 +37,22 @@ const env = {
   },
 } as never;
 
-test('patient widget calls the chat API', () => {
-  const html = readFileSync(publicFile('index.html'), 'utf8');
-  expect(html).toContain('/api/chat');
-  expect(html).toContain('localStorage');
+test('patient site calls the chat API and keeps a session id', () => {
+  const src = readFileSync(webFile('src/hooks/useChat.ts'), 'utf8');
+  expect(src).toContain('/api/chat');
+  expect(src).toContain('localStorage');
 });
 
-test('admin dashboard calls the admin APIs', () => {
-  const html = readFileSync(publicFile('admin.html'), 'utf8');
-  expect(html).toContain('/api/admin/appointments');
+test('admin dashboard calls the admin APIs and never prefills a password', () => {
+  const src = readFileSync(webFile('src/pages/Admin.tsx'), 'utf8');
+  expect(src).toContain('/api/admin/appointments');
+  expect(src).not.toMatch(/useState\(['"]test['"]\)/);
+  expect(src).not.toContain('dangerouslySetInnerHTML');
+});
+
+test('legacy receipt.html links redirect to the SPA receipt route', () => {
+  const html = readFileSync(publicFile('receipt.html'), 'utf8');
+  expect(html).toContain('/receipt/');
 });
 
 test('static asset routes serve the widgets', async () => {

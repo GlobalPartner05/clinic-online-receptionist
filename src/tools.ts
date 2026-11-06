@@ -1,4 +1,6 @@
 import {
+  BRANCHES,
+  branchOpenOn,
   clinicHoursFor,
   withinClinicHours,
   assertValidDate,
@@ -65,23 +67,9 @@ export interface ClinicReport {
 }
 
 export function getBranchForDate(date: string): { name: string; address: string } {
-  try {
-    const [y, m, d] = date.split('-').map(Number);
-    const day = new Date(Date.UTC(y, m - 1, d)).getUTCDay();
-    // Monday (1) & Tuesday (2): San Nicolas
-    if (day === 1 || day === 2) {
-      return {
-        name: 'San Nicolas Branch',
-        address: 'Sta. Maria West, San Nicolas, Pangasinan (Mon-Tue 9:00 AM - 6:00 PM)',
-      };
-    }
-  } catch {
-    // fallback below
-  }
-  return {
-    name: 'Project 6 Branch',
-    address: '111 – B2 Rd 3, Cor. Road 7, Project 6, Quezon City (Wed-Sat 10:00 AM - 6:00 PM)',
-  };
+  // Closed days (Sunday) fall back to Project 6, as before; nothing can be booked on them anyway.
+  const b = branchOpenOn(date) ?? BRANCHES[BRANCHES.length - 1];
+  return { name: b.name, address: `${b.address} (${b.daysLabel} ${b.hoursLabel})` };
 }
 
 export async function checkAvailableSlots(

@@ -16,6 +16,9 @@ import { runScheduled } from './scheduled.js';
 import { getAppointmentReceipt, generateClinicReport } from './tools.js';
 import { handleIncomingCall, handleCallProcess } from './calls.js';
 
+import { handleVoiceTool } from './voice.js';
+import { hasEmbeddedSite, serveEmbedded } from './static.js';
+
 export { DentalAgent };
 
 export interface Env {
@@ -27,6 +30,8 @@ export interface Env {
   TELEGRAM_WEBHOOK_SECRET?: string;
   BASE44_API_KEY?: string;
   BASE44_AGENT_ID?: string;
+  BASE44_CONVERSATION_ID?: string;
+  VOICE_TOOL_SECRET?: string;
 }
 
 async function handleChat(
@@ -55,6 +60,10 @@ async function handleChat(
     typeof body === 'object' && body !== null
       ? (body as { mode?: unknown }).mode
       : undefined;
+  const draft =
+    typeof body === 'object' && body !== null
+      ? (body as { draft?: unknown }).draft
+      : undefined;
   if (mode === 'base44') {
     return handleBase44Chat(request, env, message, sessionId);
   }
@@ -63,7 +72,7 @@ async function handleChat(
     return Response.json({ error: 'Database not configured' }, { status: 500 });
   }
   try {
-    const result = await handleChatMessage(env.DB, message);
+    const result = await handleChatMessage(env.DB, message, draft);
     if (result.booked && ctx?.waitUntil) {
       const booked = result.booked;
       ctx.waitUntil(
@@ -75,6 +84,8 @@ async function handleChat(
     }
     return Response.json({
       reply: result.reply,
+      speech: result.speech,
+      draft: result.draft ?? null,
       booked: result.booked,
       sessionId: typeof sessionId === 'string' ? sessionId : undefined,
       source: 'local_receptionist',
@@ -95,42 +106,40 @@ async function handleBase44Chat(
   if (!message || message.trim() === '') {
     return Response.json({ error: 'message is required' }, { status: 400 });
   }
-  const token =
-    env.BASE44_API_KEY ||
-    'b44u_e160d4b351ff9a3c72ac66e762edb620f487aeb9710d6a5f7d4cbbd06335b932';
-  const agentId = env.BASE44_AGENT_ID || '6aed68177594c709ae3cd6f5';
-  const conversationId = '6aed684155fad28da0afc957';
+  // Credentials come from the environment only (never commit them).
+  const token = env.BASE44_API_KEY;
+  const agentId = env.BASE44_AGENT_ID;
+  const conversationId = env.BASE44_CONVERSATION_ID;
 
-  try {
-    const res = await fetch(
-      `https://app.base44.com/api/agents/${agentId}/conversations/${conversationId}/messages`,
-      {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
+  if (token && agentId && conversationId) {
+    try {
+      const res = await fetch(
+        `https://app.base44.com/api/agents/${agentId}/conversations/${conversationId}/messages`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ role: 'user', content: message }),
         },
-        body: JSON.stringify({
-          role: 'user',
-          content: message,
-        }),
-      },
-    );
+      );
 
-    if (res.ok) {
-      const data = (await res.json()) as { content?: string; role?: string };
-      const reply = data.content || 'Thank you for your message.';
-      return Response.json({
-        reply,
-        source: 'base44_superagent',
-        agentId,
-        sessionId: typeof sessionId === 'string' ? sessionId : undefined,
-      });
+      if (res.ok) {
+        const data = (await res.json()) as { content?: string; role?: string };
+        const reply = data.content || 'Thank you for your message.';
+        return Response.json({
+          reply,
+          source: 'base44_superagent',
+          agentId,
+          sessionId: typeof sessionId === 'string' ? sessionId : undefined,
+        });
+      }
+      const errText = await res.text();
+      console.error('Base44 error:', res.status, errText);
+    } catch (err) {
+      console.error('Base44 connection failed:', err);
     }
-    const errText = await res.text();
-    console.error('Base44 error:', res.status, errText);
-  } catch (err) {
-    console.error('Base44 connection failed:', err);
   }
 
   if (env.DB) {
@@ -282,6 +291,10 @@ export default {
       return handleChat(request, env, ctx);
     }
 
+    if (url.pathname === '/api/voice/tool' && request.method === 'POST') {
+      return handleVoiceTool(request, env);
+    }
+
     if (url.pathname === '/api/health') {
       return Response.json({ ok: true });
     }
@@ -319,6 +332,14 @@ export default {
       }
       const msg = body?.message || body?.content || '';
       return handleBase44Chat(request, env, msg, body?.sessionId);
+    }
+
+    // Bundled-site deploys have no ASSETS binding: serve the site packaged inside this Worker.
+    if (!env.ASSETS && hasEmbeddedSite() && (request.method === 'GET' || request.method === 'HEAD')) {
+      if (!url.pathname.startsWith('/api/') && !url.pathname.startsWith('/agents/')) {
+        const page = serveEmbedded(url.pathname, request.method);
+        return page ?? Response.json({ error: 'Not found' }, { status: 404 });
+      }
     }
 
     if (request.method === 'GET' && url.pathname === '/') {
