@@ -6,15 +6,17 @@
   <title>Proof of Appointment — Suyat Dental Clinic</title>
   <style>
     :root {
-      --navy: #101f3d;
-      --gold: #c38a31;
-      --gold-bg: #fff8e7;
-      --cream: #f7f5ef;
-      --border: #e2e4e5;
-      --text: #222e3e;
-      --muted: #5b687b;
-      --green: #1b7f4e;
-      --green-bg: #eafaf1;
+      --navy: #1f2229;
+      --cyan: #00b4d8;
+      --red: #ea2825;
+      --gold: #00b4d8;
+      --gold-bg: #f0faff;
+      --cream: #f4f6f8;
+      --border: #e2e8f0;
+      --text: #1e293b;
+      --muted: #64748b;
+      --green: #10b981;
+      --green-bg: #ecfdf5;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -30,27 +32,38 @@
       background: #ffffff;
       border-radius: 20px;
       border: 1px solid var(--border);
-      box-shadow: 0 15px 35px rgba(16, 31, 61, 0.08);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
       overflow: hidden;
     }
     .receipt-header {
-      background: var(--navy);
+      background: #1f2229;
+      border-bottom: 3px solid #00b4d8;
       color: #ffffff;
-      padding: 32px 36px;
+      padding: 28px 36px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       flex-wrap: wrap;
       gap: 16px;
     }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .brand-logo {
+      height: 48px;
+      width: auto;
+      object-fit: contain;
+    }
     .brand h1 {
-      font-family: Georgia, serif;
-      font-size: 26px;
+      font-size: 22px;
+      font-weight: 700;
       letter-spacing: -0.02em;
     }
     .brand p {
       font-size: 13px;
-      color: #b8c4d4;
+      color: #94a3b8;
     }
     .verified-badge {
       display: inline-flex;
@@ -192,8 +205,11 @@
   <div class="receipt-container">
     <div class="receipt-header">
       <div class="brand">
-        <h1>Suyat Dental Clinic</h1>
-        <p>Official Proof of Appointment &amp; Booking Confirmation</p>
+        <img src="/images/suyat-logo.png" class="brand-logo" alt="Suyat Dental Clinic" />
+        <div>
+          <h1>Suyat Dental Clinic</h1>
+          <p>Official Proof of Appointment &amp; Booking Confirmation</p>
+        </div>
       </div>
       <div class="verified-badge">
         <span>✓</span> Confirmed Booking

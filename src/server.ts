@@ -51,6 +51,14 @@ async function handleChat(
   if (typeof message !== 'string' || message.trim() === '') {
     return Response.json({ error: 'message is required' }, { status: 400 });
   }
+  const mode =
+    typeof body === 'object' && body !== null
+      ? (body as { mode?: unknown }).mode
+      : undefined;
+  if (mode === 'base44') {
+    return handleBase44Chat(request, env, message, sessionId);
+  }
+
   if (!env.DB) {
     return Response.json({ error: 'Database not configured' }, { status: 500 });
   }
@@ -69,11 +77,72 @@ async function handleChat(
       reply: result.reply,
       booked: result.booked,
       sessionId: typeof sessionId === 'string' ? sessionId : undefined,
+      source: 'local_receptionist',
     });
   } catch (err) {
     console.error('chat failed', err);
     return Response.json({ error: 'Chat failed' }, { status: 500 });
   }
+}
+
+async function handleBase44Chat(
+  request: Request,
+  env: Env,
+  message: string,
+  sessionId?: unknown,
+): Promise<Response> {
+  void request;
+  if (!message || message.trim() === '') {
+    return Response.json({ error: 'message is required' }, { status: 400 });
+  }
+  const token =
+    env.BASE44_API_KEY ||
+    'b44u_e160d4b351ff9a3c72ac66e762edb620f487aeb9710d6a5f7d4cbbd06335b932';
+  const agentId = env.BASE44_AGENT_ID || '6aed68177594c709ae3cd6f5';
+  const conversationId = '6aed684155fad28da0afc957';
+
+  try {
+    const res = await fetch(
+      `https://app.base44.com/api/agents/${agentId}/conversations/${conversationId}/messages`,
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          role: 'user',
+          content: message,
+        }),
+      },
+    );
+
+    if (res.ok) {
+      const data = (await res.json()) as { content?: string; role?: string };
+      const reply = data.content || 'Thank you for your message.';
+      return Response.json({
+        reply,
+        source: 'base44_superagent',
+        agentId,
+        sessionId: typeof sessionId === 'string' ? sessionId : undefined,
+      });
+    }
+    const errText = await res.text();
+    console.error('Base44 error:', res.status, errText);
+  } catch (err) {
+    console.error('Base44 connection failed:', err);
+  }
+
+  if (env.DB) {
+    const result = await handleChatMessage(env.DB, message);
+    return Response.json({
+      reply: result.reply,
+      booked: result.booked,
+      source: 'local_fallback',
+      sessionId: typeof sessionId === 'string' ? sessionId : undefined,
+    });
+  }
+  return Response.json({ error: 'Base44 chat unavailable' }, { status: 502 });
 }
 
 async function handleAdmin(
@@ -242,7 +311,14 @@ export default {
 
     // Base44 Superagent bridge endpoint
     if (url.pathname === '/api/base44/chat' && request.method === 'POST') {
-      return handleChat(request, env, ctx);
+      let body: { message?: string; content?: string; sessionId?: string } | null = null;
+      try {
+        body = await request.json();
+      } catch {
+        return Response.json({ error: 'Invalid JSON' }, { status: 400 });
+      }
+      const msg = body?.message || body?.content || '';
+      return handleBase44Chat(request, env, msg, body?.sessionId);
     }
 
     if (request.method === 'GET' && url.pathname === '/') {
