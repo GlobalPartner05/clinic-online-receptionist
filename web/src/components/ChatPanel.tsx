@@ -1,24 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
-import { CLINIC, QUICK_CHIPS } from '../config/clinic';
+import { QUICK_CHIPS } from '../config/clinic';
 import { useChat } from '../hooks/useChat';
 import { speak, stopSpeaking, useSpeechInput } from '../hooks/useSpeech';
-import { RemotionClip, type Clip } from './RemotionPlayer';
 import { CallModal } from './CallModal';
-import { Receptionist, type ReceptionistState } from './Receptionist';
-
-export interface Pending {
-  text: string;
-  nonce: number;
-}
-
-const waveClip = (state: 'idle' | 'listening' | 'speaking'): Clip => ({
-  id: 'ReceptionistWave',
-  width: 800,
-  height: 160,
-  poster: '/images/posters/wave.webp',
-  alt: `Receptionist is ${state}`,
-  inputProps: { state },
-});
 
 const VOICE_KEY = 'suyat_voice_replies';
 const readPref = () => {
@@ -29,8 +13,8 @@ const readPref = () => {
   }
 };
 
-export function ChatPanel({ pending }: { pending: Pending | null }) {
-  const { messages, busy, mode, setMode, send, clear } = useChat('local');
+export function ChatPanel() {
+  const { messages, busy, send, clear } = useChat('local');
   const [draft, setDraft] = useState('');
   const [speaking, setSpeaking] = useState(false);
   const [callOpen, setCallOpen] = useState(false);
@@ -38,7 +22,6 @@ export function ChatPanel({ pending }: { pending: Pending | null }) {
   const [readAloud, setReadAloud] = useState(readPref);
   const [talkMode, setTalkMode] = useState(false);
   const log = useRef<HTMLDivElement>(null);
-  const lastNonce = useRef(0);
   const voiceReply = useRef(false);
   const talkRef = useRef(false);
   const readRef = useRef(readAloud);
@@ -110,23 +93,12 @@ export function ChatPanel({ pending }: { pending: Pending | null }) {
   };
 
   useEffect(() => {
-    if (pending && pending.nonce !== lastNonce.current) {
-      lastNonce.current = pending.nonce;
-      voiceReply.current = false;
-      void submit(pending.text);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pending]);
-
-  useEffect(() => {
     const el = log.current;
     if (el) el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
   }, [messages, busy]);
 
   useEffect(() => () => stopSpeaking(), []);
 
-  const state = mic.listening ? 'listening' : speaking ? 'speaking' : 'idle';
-  const face: ReceptionistState = busy ? 'thinking' : state;
 
   const toggleMic = () => {
     setMicNote('');
@@ -139,27 +111,14 @@ export function ChatPanel({ pending }: { pending: Pending | null }) {
   return (
     <div className="assistant">
       <div className="assistant-head">
-        <div className="assistant-id">
-          <Receptionist size={64} state={face} />
-          <div>
-            <h3>{CLINIC.receptionistName}</h3>
-            <p className="muted small" aria-live="polite">
-              24/7 AI receptionist · {mic.listening ? 'Listening…' : speaking ? 'Speaking…' : busy ? 'Typing…' : 'Online now'}
-            </p>
-          </div>
-        </div>
-        <div className="seg" role="group" aria-label="Assistant">
-          <button aria-pressed={mode === 'local'} onClick={() => setMode('local')}>{CLINIC.shortName}</button>
-          <button aria-pressed={mode === 'base44'} onClick={() => setMode('base44')}>Base44</button>
-        </div>
+        <p className="muted small" aria-live="polite">
+          {mic.listening ? 'Listening… go ahead and talk' : speaking ? 'Speaking…' : busy ? 'Typing…' : 'Virtual assistant · online 24/7'}
+        </p>
       </div>
-
-      <RemotionClip clip={waveClip(state)} className="wave" />
 
       <div ref={log} className="chat-log" role="log" aria-live="polite" aria-label="Conversation">
         {messages.map((m) => (
           <div key={m.id} className={`msg ${m.role}`}>
-            {m.role !== 'user' && <Receptionist size={32} ring={false} />}
             <span className="bubble">
               {m.text}
               {m.receiptUrl && (
@@ -172,7 +131,6 @@ export function ChatPanel({ pending }: { pending: Pending | null }) {
         ))}
         {busy && (
           <div className="msg bot" aria-hidden>
-            <Receptionist size={32} ring={false} state="thinking" />
             <span className="bubble typing"><i /><i /><i /></span>
           </div>
         )}

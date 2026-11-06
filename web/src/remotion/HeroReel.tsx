@@ -31,8 +31,6 @@ export const HeroReel: React.FC = () => {
   const { fps, width, height } = useVideoConfig();
   const vertical = height > width;
   const logo = spring({ frame, fps, config: { damping: 12 } });
-  const tooth = spring({ frame: frame - 20, fps, config: { damping: 9, stiffness: 90 } });
-  const float = Math.sin(frame / 14) * 10;
   const badge = spring({ frame: frame - 85, fps, config: { damping: 12 } });
   const underline = interpolate(frame, [60, 95], [0, 100], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
   const photo = spring({ frame: frame - 30, fps, config: { damping: 16 } });
@@ -74,9 +72,6 @@ export const HeroReel: React.FC = () => {
         <Img src={staticFile('images/dentist-thumbs-up.webp')} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
       </div>
 
-      <div style={{ position: 'absolute', right: (vertical ? 60 : 480) * u, top: (vertical ? 470 : 80) * u, transform: `translateY(${float}px) scale(${tooth}) rotate(${interpolate(tooth, [0, 1], [-30, 0])}deg)` }}>
-        <Img src={staticFile('images/receptionist.webp')} style={{ width: (vertical ? 220 : 170) * u, height: (vertical ? 220 : 170) * u, filter: 'drop-shadow(0 12px 24px rgba(0,180,216,.45))' }} />
-      </div>
 
       <div
         style={{

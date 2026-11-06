@@ -7,7 +7,7 @@ const NAV = [
   ['#services', 'Services'],
   ['#how', 'How it works'],
   ['#branches', 'Branches'],
-  ['#assistant', 'Book now'],
+  ['#book', 'Book now'],
 ] as const;
 
 export function Header() {
@@ -38,11 +38,8 @@ export function Header() {
               {label}
             </a>
           ))}
-          <Link to="/admin" onClick={() => setOpen(false)} className="nav-staff">
-            Staff portal
-          </Link>
         </nav>
-        <a href="#assistant" className="btn btn-primary header-cta">
+        <a href="#book" className="btn btn-primary header-cta">
           Book appointment
         </a>
         <button ref={btn} className="menu-btn" aria-expanded={open} aria-controls="main-nav" aria-label={open ? 'Close menu' : 'Open menu'} onClick={() => setOpen((o) => !o)}>

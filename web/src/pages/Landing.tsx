@@ -1,50 +1,53 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Header } from '../components/Header';
 import { Branches, Footer, Hero, HowItWorks, Services } from '../components/Sections';
-import { ChatPanel, type Pending } from '../components/ChatPanel';
-import { Receptionist } from '../components/Receptionist';
+import { BookingForm } from '../components/BookingForm';
+import { ChatPanel } from '../components/ChatPanel';
 import { CLINIC } from '../config/clinic';
 
+const smooth = () => (matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth');
+
 export default function Landing() {
-  const [pending, setPending] = useState<Pending | null>(null);
-  const [chatInView, setChatInView] = useState(false);
+  const [preselect, setPreselect] = useState<{ service: string; nonce: number } | null>(null);
 
-  // The floating button is only useful while the chat itself is off-screen.
-  useEffect(() => {
-    const el = document.getElementById('assistant');
-    if (!el || typeof IntersectionObserver === 'undefined') return;
-    const io = new IntersectionObserver(([e]) => setChatInView(e.isIntersecting), { threshold: 0.15 });
-    io.observe(el);
-    return () => io.disconnect();
+  const goBook = useCallback(() => {
+    document.getElementById('book')?.scrollIntoView({ behavior: smooth() });
   }, []);
-
-  const book = useCallback((prompt?: string) => {
-    document.getElementById('assistant')?.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
-    if (prompt) setPending({ text: prompt, nonce: Date.now() });
-    else document.getElementById('chat-input')?.focus({ preventScroll: true });
-  }, []);
+  const pick = useCallback((service: string) => {
+    setPreselect({ service, nonce: Date.now() });
+    goBook();
+  }, [goBook]);
 
   return (
     <>
       <a className="skip" href="#main">Skip to content</a>
       <Header />
       <main id="main">
-        <Hero onBook={book} />
-        <Services onBook={book} />
-        <HowItWorks />
-        <section id="assistant" className="section">
-          <div className="container assistant-wrap">
-            <ChatPanel pending={pending} />
+        <Hero onBook={goBook} />
+        <Services onPick={pick} />
+        <section id="book" className="section book-section">
+          <div className="container book-wrap">
+            <div className="book-intro">
+              <h2>Book your appointment</h2>
+              <p className="lead-sm">Choose a service and date, pick an open time, and you are done. You get a booking reference straight away.</p>
+              <ul className="check-list">
+                <li>Open times shown live for the right branch</li>
+                <li>No account or payment needed</li>
+                <li>Printable proof of appointment</li>
+              </ul>
+            </div>
+            <BookingForm preselect={preselect} />
           </div>
         </section>
+        <HowItWorks />
         <Branches />
+        <section id="assistant" className="section alt">
+          <div className="container assistant-wrap">
+            <h2 className="assistant-title">{CLINIC.assistantTitle}</h2>
+            <ChatPanel />
+          </div>
+        </section>
       </main>
-      {!chatInView && (
-      <button className="fab" onClick={() => book()} aria-label={`Chat with ${CLINIC.receptionistName} to book an appointment`}>
-        <Receptionist size={56} ring={false} />
-        <span className="fab__label">Need help booking?</span>
-      </button>
-      )}
       <Footer />
     </>
   );

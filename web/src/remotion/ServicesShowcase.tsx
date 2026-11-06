@@ -1,5 +1,5 @@
 import React from 'react';
-import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } from 'remotion';
+import { AbsoluteFill, Img, interpolate, spring, staticFile, useCurrentFrame, useVideoConfig } from 'remotion';
 import { C, FONT, FONT_DISPLAY } from './theme';
 import { SERVICES } from '../config/clinic';
 
@@ -35,7 +35,7 @@ export const ServicesShowcase: React.FC = () => {
                 transition: 'none',
               }}
             >
-              <div style={{ fontSize: 54 * u }}>{s.icon}</div>
+              <Img src={staticFile(s.image.replace(/^\//, ''))} style={{ width: 120 * u, height: 104 * u, objectFit: 'cover', borderRadius: 18 * u }} />
               <div style={{ fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 28 * u, color: C.navy, marginTop: 10 * u }}>
                 <span style={{ color: C.red, marginRight: 8 * u, fontStyle: 'italic' }}>0{i + 1}</span>
                 {s.title}
