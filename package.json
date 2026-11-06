@@ -5,7 +5,12 @@
   "scripts": {
     "test": "vitest run",
     "dev": "wrangler dev --local",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "build:web": "npm --prefix web run build",
+    "dev:web": "npm --prefix web run dev",
+    "test:web": "npm --prefix web test",
+    "render:clips": "npm --prefix web run render:clips",
+    "deploy": "npm run build:web && wrangler deploy"
   },
   "dependencies": {
     "@cloudflare/ai-chat": "^0.12.1",

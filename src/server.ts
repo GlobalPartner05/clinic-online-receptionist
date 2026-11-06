@@ -27,6 +27,7 @@ export interface Env {
   TELEGRAM_WEBHOOK_SECRET?: string;
   BASE44_API_KEY?: string;
   BASE44_AGENT_ID?: string;
+  BASE44_CONVERSATION_ID?: string;
 }
 
 async function handleChat(
@@ -95,42 +96,40 @@ async function handleBase44Chat(
   if (!message || message.trim() === '') {
     return Response.json({ error: 'message is required' }, { status: 400 });
   }
-  const token =
-    env.BASE44_API_KEY ||
-    'b44u_e160d4b351ff9a3c72ac66e762edb620f487aeb9710d6a5f7d4cbbd06335b932';
-  const agentId = env.BASE44_AGENT_ID || '6aed68177594c709ae3cd6f5';
-  const conversationId = '6aed684155fad28da0afc957';
+  // Credentials come from the environment only (never commit them).
+  const token = env.BASE44_API_KEY;
+  const agentId = env.BASE44_AGENT_ID;
+  const conversationId = env.BASE44_CONVERSATION_ID;
 
-  try {
-    const res = await fetch(
-      `https://app.base44.com/api/agents/${agentId}/conversations/${conversationId}/messages`,
-      {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
+  if (token && agentId && conversationId) {
+    try {
+      const res = await fetch(
+        `https://app.base44.com/api/agents/${agentId}/conversations/${conversationId}/messages`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ role: 'user', content: message }),
         },
-        body: JSON.stringify({
-          role: 'user',
-          content: message,
-        }),
-      },
-    );
+      );
 
-    if (res.ok) {
-      const data = (await res.json()) as { content?: string; role?: string };
-      const reply = data.content || 'Thank you for your message.';
-      return Response.json({
-        reply,
-        source: 'base44_superagent',
-        agentId,
-        sessionId: typeof sessionId === 'string' ? sessionId : undefined,
-      });
+      if (res.ok) {
+        const data = (await res.json()) as { content?: string; role?: string };
+        const reply = data.content || 'Thank you for your message.';
+        return Response.json({
+          reply,
+          source: 'base44_superagent',
+          agentId,
+          sessionId: typeof sessionId === 'string' ? sessionId : undefined,
+        });
+      }
+      const errText = await res.text();
+      console.error('Base44 error:', res.status, errText);
+    } catch (err) {
+      console.error('Base44 connection failed:', err);
     }
-    const errText = await res.text();
-    console.error('Base44 error:', res.status, errText);
-  } catch (err) {
-    console.error('Base44 connection failed:', err);
   }
 
   if (env.DB) {
