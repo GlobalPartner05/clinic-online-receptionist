@@ -17,6 +17,7 @@ import { getAppointmentReceipt, generateClinicReport } from './tools.js';
 import { handleIncomingCall, handleCallProcess } from './calls.js';
 
 import { handleVoiceTool } from './voice.js';
+import { hasEmbeddedSite, serveEmbedded } from './static.js';
 
 export { DentalAgent };
 
@@ -331,6 +332,14 @@ export default {
       }
       const msg = body?.message || body?.content || '';
       return handleBase44Chat(request, env, msg, body?.sessionId);
+    }
+
+    // Bundled-site deploys have no ASSETS binding: serve the site packaged inside this Worker.
+    if (!env.ASSETS && hasEmbeddedSite() && (request.method === 'GET' || request.method === 'HEAD')) {
+      if (!url.pathname.startsWith('/api/') && !url.pathname.startsWith('/agents/')) {
+        const page = serveEmbedded(url.pathname, request.method);
+        return page ?? Response.json({ error: 'Not found' }, { status: 404 });
+      }
     }
 
     if (request.method === 'GET' && url.pathname === '/') {
