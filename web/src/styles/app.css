@@ -188,3 +188,10 @@ input:focus-visible, select:focus-visible { border-color: var(--cyan); }
 .fab:hover { transform: translateY(-2px); }
 @media (max-width: 520px) { .fab__label { display: none; } .fab { padding: 4px; } }
 @media (prefers-reduced-motion: reduce) { .avatar img, .avatar--listening, .fab { animation: none !important; } }
+
+/* ===== Voice bar ===== */
+.voice-bar { display: flex; flex-wrap: wrap; gap: 8px; }
+.toggle { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 8px 14px; border: 2px solid var(--border); border-radius: 999px; background: var(--surface); color: var(--text); font: 600 .875rem var(--font); cursor: pointer; transition: background-color .15s, border-color .15s; }
+.toggle[aria-pressed='true'] { background: var(--cyan-soft); border-color: var(--cyan); }
+.toggle--stop { border-color: var(--red); }
+@media (hover: hover) { .toggle:hover { border-color: var(--cyan); } }

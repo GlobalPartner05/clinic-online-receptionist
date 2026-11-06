@@ -20,27 +20,94 @@ const waveClip = (state: 'idle' | 'listening' | 'speaking'): Clip => ({
   inputProps: { state },
 });
 
+const VOICE_KEY = 'suyat_voice_replies';
+const readPref = () => {
+  try {
+    return window.localStorage.getItem(VOICE_KEY) === '1';
+  } catch {
+    return false;
+  }
+};
+
 export function ChatPanel({ pending }: { pending: Pending | null }) {
   const { messages, busy, mode, setMode, send, clear } = useChat('local');
   const [draft, setDraft] = useState('');
   const [speaking, setSpeaking] = useState(false);
   const [callOpen, setCallOpen] = useState(false);
   const [micNote, setMicNote] = useState('');
+  const [readAloud, setReadAloud] = useState(readPref);
+  const [talkMode, setTalkMode] = useState(false);
   const log = useRef<HTMLDivElement>(null);
   const lastNonce = useRef(0);
+  const voiceReply = useRef(false);
+  const talkRef = useRef(false);
+  const readRef = useRef(readAloud);
+  const speakToken = useRef(0);
+  const micRef = useRef<{ start: () => boolean; stop: () => void } | null>(null);
+  talkRef.current = talkMode;
+  readRef.current = readAloud;
+
+  const cancelSpeech = () => {
+    speakToken.current++; // invalidates any pending "finished speaking" callback
+    stopSpeaking();
+    setSpeaking(false);
+  };
 
   const submit = async (text: string) => {
-    const reply = await send(text);
-    if (reply && voiceReply.current) {
-      setSpeaking(true);
-      speak(reply, () => setSpeaking(false));
+    cancelSpeech(); // barge-in: typing or talking over the bot stops it
+    const res = await send(text);
+    if (!res) return;
+    if (!(readRef.current || voiceReply.current || talkRef.current)) return;
+    const token = ++speakToken.current;
+    setSpeaking(true);
+    speak(res.speech, () => {
+      if (token !== speakToken.current) return; // cancelled or replaced
+      setSpeaking(false);
+      if (talkRef.current && res.ok) micRef.current?.start(); // hands-free: listen for the next thing
+    });
+  };
+
+  const mic = useSpeechInput(
+    (t) => {
+      voiceReply.current = true;
+      void submit(t);
+    },
+    () => {
+      if (talkRef.current) {
+        setTalkMode(false);
+        setMicNote('I didn’t hear anything, so talk mode is off. Tap Talk mode to start again.');
+      }
+    },
+  );
+  micRef.current = mic;
+
+  const setRead = (on: boolean) => {
+    setReadAloud(on);
+    try {
+      window.localStorage.setItem(VOICE_KEY, on ? '1' : '0');
+    } catch {
+      /* storage blocked: preference just won't persist */
+    }
+    if (!on) cancelSpeech();
+  };
+
+  const toggleTalk = () => {
+    setMicNote('');
+    if (talkMode) {
+      setTalkMode(false);
+      mic.stop();
+      cancelSpeech();
+      return;
+    }
+    cancelSpeech();
+    setTalkMode(true);
+    talkRef.current = true;
+    voiceReply.current = true;
+    if (!mic.start()) {
+      setTalkMode(false);
+      setMicNote('Voice input isn’t supported in this browser — please type instead.');
     }
   };
-  const voiceReply = useRef(false);
-  const mic = useSpeechInput((t) => {
-    voiceReply.current = true;
-    void submit(t);
-  });
 
   useEffect(() => {
     if (pending && pending.nonce !== lastNonce.current) {
@@ -63,6 +130,8 @@ export function ChatPanel({ pending }: { pending: Pending | null }) {
 
   const toggleMic = () => {
     setMicNote('');
+    cancelSpeech(); // otherwise the mic would hear the bot talking
+    setTalkMode(false);
     if (mic.listening) return mic.stop();
     if (!mic.start()) setMicNote('Voice input isn’t supported in this browser — please type instead.');
   };
@@ -117,6 +186,22 @@ export function ChatPanel({ pending }: { pending: Pending | null }) {
         ))}
       </div>
 
+      <div className="voice-bar" role="group" aria-label="Voice options">
+        <button type="button" className="toggle" aria-pressed={readAloud} onClick={() => setRead(!readAloud)}>
+          <span aria-hidden>{readAloud ? '🔊' : '🔈'}</span> Read replies aloud
+        </button>
+        {mic.supported && (
+          <button type="button" className="toggle" aria-pressed={talkMode} onClick={toggleTalk}>
+            <span aria-hidden>🗣️</span> Talk mode
+          </button>
+        )}
+        {speaking && (
+          <button type="button" className="toggle toggle--stop" onClick={cancelSpeech}>
+            <span aria-hidden>⏹</span> Stop speaking
+          </button>
+        )}
+      </div>
+
       <form
         className="composer"
         onSubmit={(e) => {
@@ -128,7 +213,7 @@ export function ChatPanel({ pending }: { pending: Pending | null }) {
         }}
       >
         <label htmlFor="chat-input" className="sr-only">Message the receptionist</label>
-        <input id="chat-input" value={draft} onChange={(e) => setDraft(e.target.value)} placeholder="Type a message, e.g. “Check slots tomorrow”" autoComplete="off" maxLength={500} />
+        <input id="chat-input" value={draft} onChange={(e) => setDraft(e.target.value)} placeholder="Type or tap the mic, e.g. “I want a cleaning next Monday at 2 PM”" autoComplete="off" maxLength={500} />
         <button type="button" className={`icon-btn ${mic.listening ? 'on' : ''}`} onClick={toggleMic} aria-pressed={mic.listening} aria-label={mic.listening ? 'Stop voice input' : 'Start voice input'}>🎙️</button>
         <button type="button" className="icon-btn" onClick={() => setCallOpen(true)} aria-label="Start voice call with the receptionist">📞</button>
         <button className="btn btn-primary" disabled={busy || !draft.trim()}>Send</button>

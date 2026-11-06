@@ -7,19 +7,10 @@ import {
   getAppointmentReceipt,
   generateClinicReport,
 } from './tools.js';
-import { assertValidDate } from './db.js';
+import { converse, cleanDraft, type BookedSummary, type Draft } from './converse.js';
+import { allIsoDates, parseDate, parsePhone, parseService, parseTime, toSpeech } from './nlu.js';
 
-const SERVICES = [
-  'root canal',
-  'cleaning',
-  'extraction',
-  'filling',
-  'braces',
-  'checkup',
-  'whitening',
-  'denture',
-  'consultation',
-];
+export type { BookedSummary, Draft };
 
 function manilaDatePlus(days: number): string {
   const parts = new Intl.DateTimeFormat('en-CA', {
@@ -29,171 +20,51 @@ function manilaDatePlus(days: number): string {
     day: '2-digit',
   }).formatToParts(new Date());
   const get = (t: string) => parts.find((p) => p.type === t)!.value;
-  const base = Date.UTC(
-    Number(get('year')),
-    Number(get('month')) - 1,
-    Number(get('day')),
-  );
+  const base = Date.UTC(Number(get('year')), Number(get('month')) - 1, Number(get('day')));
   return new Date(base + days * 86_400_000).toISOString().slice(0, 10);
-}
-
-function extractDate(text: string): string | null {
-  const m = text.match(/\b(\d{4})-(\d{2})-(\d{2})\b/);
-  if (m) {
-    try {
-      assertValidDate(m[0]);
-      return m[0];
-    } catch {
-      return null;
-    }
-  }
-  if (/\btomorrow\b/i.test(text)) return manilaDatePlus(1);
-  if (/\btoday\b/i.test(text)) return manilaDatePlus(0);
-  return null;
-}
-
-function extractAllDates(text: string): string[] {
-  const matches = [...text.matchAll(/\b(\d{4})-(\d{2})-(\d{2})\b/g)].map(
-    (m) => m[0],
-  );
-  const valid = matches.filter((d) => {
-    try {
-      assertValidDate(d);
-      return true;
-    } catch {
-      return false;
-    }
-  });
-  if (valid.length === 0) {
-    const single = extractDate(text);
-    return single ? [single] : [];
-  }
-  return valid;
-}
-
-function extractTime(text: string): string | null {
-  const m = text.match(/\b([01]?\d|2[0-3]):([0-5]\d)\b/);
-  if (!m) return null;
-  return `${m[1].padStart(2, '0')}:${m[2]}`;
-}
-
-function extractPhone(text: string): string | null {
-  const scrubbed = text
-    .replace(/\b\d{4}-\d{2}-\d{2}\b/g, ' ')
-    .replace(/\b([01]?\d|2[0-3]):([0-5]\d)\b/g, ' ');
-  const m = scrubbed.match(/\+?\d[\d\s-]{6,14}\d/);
-  return m ? m[0].replace(/[\s-]/g, '') : null;
-}
-
-function extractName(text: string): string | null {
-  const m = text.match(/name\s*[:\-]?\s*([A-Za-z][A-Za-z .'-]{1,40})/i);
-  if (!m) return null;
-  return m[1].split(',')[0].replace(/\d+.*$/, '').trim() || null;
-}
-
-function extractEmail(text: string): string | null {
-  const m = text.match(/[\w.+-]+@[\w-]+\.[\w.]+/);
-  return m ? m[0] : null;
-}
-
-function extractService(text: string): string | null {
-  const lower = text.toLowerCase();
-  return SERVICES.find((s) => lower.includes(s)) ?? null;
-}
-
-export interface BookedSummary {
-  id: string;
-  patient_name: string;
-  patient_phone: string;
-  patient_email: string | null;
-  service_type: string;
-  appointment_date: string;
-  appointment_time: string;
-  receipt_url?: string;
-  reference_number?: string;
 }
 
 export interface ChatResult {
   reply: string;
+  /** The same reply rewritten to sound right when read aloud (no ISO dates, 24h times, links, markdown, emoji). */
+  speech: string;
   booked?: BookedSummary;
+  /** Conversation state to send back with the next message (null/absent = no conversation in progress). */
+  draft?: Draft | null;
 }
 
-export async function handleChatMessage(
+const BRANCHES_TEXT =
+  'We have two branches: San Nicolas, Pangasinan (Sta. Maria West) open Monday and Tuesday, 9 AM to 6 PM, and Project 6, Quezon City (111 B2 Road 3 corner Road 7) open Wednesday to Saturday, 10 AM to 6 PM. After-hours appointments are available by prior arrangement.';
+const SERVICES_TEXT =
+  'We offer cleaning and checkups, restorations such as fillings, braces and consultations, teeth whitening, extractions, and urgent dental care. I can book any of these for you. I don\'t have prices to quote, our team will explain costs at your visit.';
+
+async function route(
   db: D1Database,
   message: string,
-): Promise<ChatResult> {
+  draftIn: Draft | null,
+  today: string,
+): Promise<Omit<ChatResult, 'speech'>> {
   const text = message.trim();
   const lower = text.toLowerCase();
-  const phone = extractPhone(text);
-  const time = extractTime(text);
-  const dates = extractAllDates(text);
+  const phone = parsePhone(text);
+  const time = parseTime(text);
+  const dates = allIsoDates(text);
+
+  // Mid-conversation: keep going unless the caller clearly switched to another task.
+  const switched = /reschedule|re-schedule|\breceipt\b|\bproof\b|\bstatus\b|\bcancel\b|\b(report|clinic stats)\b/.test(lower);
+  if (draftIn && !(switched && !/^\s*cancel that/.test(lower))) {
+    const r = await converse(db, text, draftIn, today);
+    return r;
+  }
 
   // 1. Reschedule intent
-  if (/reschedule|move appointment|change appointment|re-schedule/.test(lower)) {
-    if (!phone) {
-      return {
-        reply:
-          'To reschedule, please provide your phone number, current appointment date, new date, and new time. ' +
-          'Example: "Reschedule 09170000001 from 2026-10-20 to 2026-10-22 at 14:00".',
-      };
-    }
+  if (/reschedule|move (my )?appointment|change (my )?appointment|re-schedule/.test(lower)) {
+    return converse(db, text, null, today, 'reschedule');
+  }
 
-    let oldDate: string | null = null;
-    let newDate: string | null = null;
-
-    if (dates.length >= 2) {
-      oldDate = dates[0];
-      newDate = dates[1];
-    } else if (dates.length === 1) {
-      // Find user's confirmed appointment
-      const userAppts = await queryAppointments(db, { patientPhone: phone });
-      const active = userAppts.find((a) => a.status === 'confirmed');
-      if (active) {
-        oldDate = active.appointment_date;
-        newDate = dates[0];
-      } else {
-        oldDate = dates[0];
-      }
-    }
-
-    if (!oldDate || !newDate || !time) {
-      return {
-        reply:
-          'Please specify both your current appointment date, the new desired date (YYYY-MM-DD), and time (HH:MM). ' +
-          'Example: "Reschedule 09170000001 from 2026-10-20 to 2026-10-22 at 14:00".',
-      };
-    }
-
-    try {
-      const res = await rescheduleAppointment(db, {
-        patientPhone: phone,
-        oldDate,
-        newDate,
-        newTime: time,
-      });
-      return {
-        reply:
-          `Your appointment has been successfully rescheduled to ${res.appointment.appointmentDate} at ${res.appointment.appointmentTime} at our ${res.appointment.branch}. ` +
-          `Ref: ${res.appointment.referenceNumber}. View your updated proof of appointment: ${res.appointment.receiptUrl}`,
-      };
-    } catch (err) {
-      if (err instanceof Error && err.message === 'APPOINTMENT_NOT_FOUND') {
-        return {
-          reply: `I couldn't find a confirmed appointment for ${phone} on ${oldDate}. Please check your phone number and date.`,
-        };
-      }
-      if (err instanceof Error && err.message === 'SLOT_TAKEN') {
-        const alt = await checkAvailableSlots(db, newDate);
-        return {
-          reply:
-            `Sorry, ${newDate} at ${time} is already booked.` +
-            (alt.length > 0 ? ` Other open slots: ${alt.slice(0, 4).join(', ')}.` : ''),
-        };
-      }
-      return {
-        reply: 'Sorry, we could not reschedule that slot. Please check clinic hours (09:00-17:00 Mon-Fri, 09:00-13:00 Sat).',
-      };
-    }
+  // Cancellation (before status: "cancel my appointment" must not be read as a status check)
+  if (/\bcancel\b/.test(lower)) {
+    return converse(db, text, null, today, 'cancel');
   }
 
   // 2. Receipt / Proof of Appointment intent
@@ -270,35 +141,16 @@ export async function handleChatMessage(
     };
   }
 
-  // 5. Cancellation
-  if (/\bcancel\b/.test(lower)) {
-    const singleDate = dates[0] || extractDate(text);
-    if (!phone || !singleDate) {
-      return {
-        reply:
-          'To cancel, please send your phone number and appointment date (YYYY-MM-DD). Example: Cancel 09170000001 on 2026-10-20.',
-      };
-    }
-    const { cancelled } = await cancelAppointment(db, {
-      patientPhone: phone,
-      date: singleDate,
-    });
-    return {
-      reply:
-        cancelled > 0
-          ? `Done — your appointment on ${singleDate} is cancelled. The slot is now open if you want to rebook.`
-          : `I couldn't find a confirmed appointment for ${phone} on ${singleDate}. Please check the details and try again.`,
-    };
-  }
-
-  const singleDate = dates[0] || extractDate(text);
+  const bookingWords = /\b(book|reserve|appointment|schedule|set up|i (?:want|need|would like|'d like)|can i (?:get|have))\b/.test(lower);
+  const service = parseService(text);
+  const singleDate = dates[0] || parseDate(text, today);
 
   // 6. Slots check
-  if (/avail|slot|open|schedule|free/.test(lower) && !time) {
+  if (/avail|slot|\bopen\b|\bfree\b/.test(lower) && !time && !bookingWords && !service) {
     if (!singleDate) {
       return {
-        reply:
-          'Which date should I check? Please send a date like 2026-10-20 or say tomorrow.',
+        reply: 'Which date should I check? You can say tomorrow, next Monday, or a date like November 20th.',
+        draft: { intent: 'book', awaiting: 'date' },
       };
     }
     const slots = await checkAvailableSlots(db, singleDate);
@@ -306,83 +158,47 @@ export async function handleChatMessage(
       reply:
         slots.length > 0
           ? `Open slots on ${singleDate}: ${slots.join(', ')}. Reply with a time plus your name and phone to book.`
-          : `Sorry, ${singleDate} is fully booked. Please try another date.`,
+          : `Sorry, ${singleDate} is fully booked or closed. Please try another date.`,
     };
   }
 
-  // 7. Booking
-  if (/book|reserve|appointment|schedule/.test(lower) || (time && phone)) {
-    const name = extractName(text);
-    const email = extractEmail(text);
-    const service = extractService(text) ?? 'general consultation';
-    const missing: string[] = [];
-    if (!name) missing.push('your name (e.g. name Ana)');
-    if (!phone) missing.push('your phone number');
-    if (!singleDate) missing.push('a date (YYYY-MM-DD or tomorrow)');
-    if (!time) missing.push('a time (HH:MM, clinic hours 09:00-17:00)');
-    if (missing.length > 0) {
-      return { reply: `Almost there — I still need ${missing.join(', ')}.` };
-    }
-    try {
-      const { id, receiptUrl, referenceNumber } = await bookAppointment(db, {
-        patientName: name!,
-        patientPhone: phone!,
-        patientEmail: email ?? undefined,
-        serviceType: service,
-        date: singleDate!,
-        time: time!,
-      });
-      const booked: BookedSummary = {
-        id,
-        patient_name: name!,
-        patient_phone: phone!,
-        patient_email: email,
-        service_type: service,
-        appointment_date: singleDate!,
-        appointment_time: time!,
-        receipt_url: receiptUrl,
-        reference_number: referenceNumber,
-      };
-      return {
-        reply:
-          `You're booked, ${name}! ${service} on ${singleDate} at ${time}. ` +
-          `Booking Ref: ${referenceNumber}. ` +
-          `Proof of appointment & digital receipt: ${receiptUrl}. ` +
-          `We'll also send reminders before your visit!`,
-        booked,
-      };
-    } catch (err) {
-      if (err instanceof Error && err.message === 'SLOT_TAKEN') {
-        const alternatives = (await checkAvailableSlots(db, singleDate!))
-          .filter((t) => t !== time)
-          .slice(0, 4);
-        return {
-          reply:
-            `Sorry, ${singleDate} at ${time} is already taken.` +
-            (alternatives.length > 0
-              ? ` Other open slots: ${alternatives.join(', ')}.`
-              : ' Please try another date.'),
-        };
-      }
-      if (err instanceof Error && err.message.startsWith('INVALID_')) {
-        return {
-          reply:
-            'That date or time looks invalid. Clinic hours are 09:00-17:00 (Sat 09:00-13:00, Sun closed); please send a valid date (YYYY-MM-DD) and time (HH:MM).',
-        };
-      }
-      throw err;
-    }
+  // 7. Questions about the clinic
+  if (/\b(hours?|open(?:ing)?|close|closing|what time|when are you)\b/.test(lower) && !bookingWords) {
+    return { reply: BRANCHES_TEXT + ' Would you like me to book you in?' };
+  }
+  if (/\b(where|location|address|branch(?:es)?|direction|near me|find you)\b/.test(lower) && !bookingWords) {
+    return { reply: BRANCHES_TEXT };
+  }
+  if (/\b(services?|offer|what do you do|price|prices|cost|how much|rates?)\b/.test(lower) && !bookingWords) {
+    return { reply: SERVICES_TEXT };
+  }
+  if (/^\s*(thanks?|thank you|salamat|ok(?:ay)? thanks?)\b/.test(lower)) {
+    return { reply: "You're welcome! Is there anything else I can help you with?" };
+  }
+
+  // 8. Booking (conversational)
+  if (bookingWords || service || (time && phone)) {
+    return converse(db, text, null, today, 'book');
   }
 
   return {
     reply:
       'Mabuhay! I am the Suyat Dental Clinic 24/7 AI Receptionist. I can:\n' +
-      '• Check available slots ("What slots are open tomorrow?")\n' +
-      '• Book appointments ("Book cleaning tomorrow 10:00, name Ana 09170000001")\n' +
-      '• Reschedule visits ("Reschedule 09170000001 to 2026-10-22 at 14:00")\n' +
-      '• Deliver official proof of appointment ("Send receipt for 09170000001")\n' +
-      '• Check booking status or cancel an appointment\n' +
-      '• Answer phone calls & deliver SMS reminders',
+      '• Book an appointment (just say "I want a cleaning next Monday at 2 PM")\n' +
+      '• Check open times ("What slots are open tomorrow?")\n' +
+      '• Reschedule or cancel a visit\n' +
+      '• Send your proof of appointment ("Send receipt for 09170000001")\n' +
+      '• Tell you our hours, branches and services',
   };
+}
+
+export async function handleChatMessage(
+  db: D1Database,
+  message: string,
+  draft?: unknown,
+  today: string = manilaDatePlus(0),
+): Promise<ChatResult> {
+  const r = await route(db, message, cleanDraft(draft), today);
+  return { ...r, speech: toSpeech(r.reply) };
 }
 

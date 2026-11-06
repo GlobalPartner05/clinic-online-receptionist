@@ -46,3 +46,13 @@ Dead code
 - [x] End-to-end: Python handlers vs local Worker (book/dup/reschedule/cancel/wrong secret)
 - [ ] NOT DONE: apply to NVA checkout, Docker start, live LLM validation, real mic test (needs NVIDIA_API_KEY + host + browser)
 - [ ] Before production: caller verification, rate limit, consent/retention, resolve backend-vs-site hours
+
+## Chatbot with a voice (current focus; NVIDIA voice/ service is PARKED)
+- [x] Multi-turn conversation: server returns/accepts a `draft` (validated by `cleanDraft`), one question at a time, confirm before booking
+- [x] Spoken-language parsing (`src/nlu.ts`): relative dates, weekdays, month names, times (2pm, two pm, noon), spoken phone digits, names, service synonyms, yes/no incl. Filipino
+- [x] Cancel / reschedule by conversation; FAQ (hours, branches, services, thanks); toothache empathy without medical advice
+- [x] Bug fixes: "cancel my appointment" was routed to status check; past dates were bookable; chip phrasing the bot could not parse
+- [x] `speech` field (no ISO dates / 24h times / links / emoji) used for TTS; found+fixed AM/PM double conversion in browser test
+- [x] UI: Read replies aloud (persisted), Talk mode (hands-free), Stop speaking, barge-in, best English voice, call modal uses the same chat brain
+- [x] Browser test with scripted fake mic/speaker: full hands-free booking
+- [ ] Not verified: real microphone/speaker, other browsers (Firefox has no SpeechRecognition), accents/noise accuracy

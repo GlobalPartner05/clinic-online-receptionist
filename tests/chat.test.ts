@@ -54,6 +54,8 @@ test('date-before-phone message stores the phone, not the date', async () => {
   const result = await handleChatMessage(
     db as never,
     'Book cleaning on 2026-10-20 at 10:00 name Ana 09170000001',
+    undefined,
+    '2026-10-01', // fixed "today" so the date is not in the past
   );
   expect(result.booked?.patient_phone).toBe('09170000001');
   expect(result.booked?.appointment_date).toBe('2026-10-20');

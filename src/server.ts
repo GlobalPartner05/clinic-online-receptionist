@@ -59,6 +59,10 @@ async function handleChat(
     typeof body === 'object' && body !== null
       ? (body as { mode?: unknown }).mode
       : undefined;
+  const draft =
+    typeof body === 'object' && body !== null
+      ? (body as { draft?: unknown }).draft
+      : undefined;
   if (mode === 'base44') {
     return handleBase44Chat(request, env, message, sessionId);
   }
@@ -67,7 +71,7 @@ async function handleChat(
     return Response.json({ error: 'Database not configured' }, { status: 500 });
   }
   try {
-    const result = await handleChatMessage(env.DB, message);
+    const result = await handleChatMessage(env.DB, message, draft);
     if (result.booked && ctx?.waitUntil) {
       const booked = result.booked;
       ctx.waitUntil(
@@ -79,6 +83,8 @@ async function handleChat(
     }
     return Response.json({
       reply: result.reply,
+      speech: result.speech,
+      draft: result.draft ?? null,
       booked: result.booked,
       sessionId: typeof sessionId === 'string' ? sessionId : undefined,
       source: 'local_receptionist',

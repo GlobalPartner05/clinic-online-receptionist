@@ -16,7 +16,7 @@ export const CLINIC = {
   heroSubhead: 'for a Healthier, Brighter Smile',
   heroLead: 'for a healthier, brighter smile — book in minutes with our 24/7 AI receptionist.',
   welcome:
-    'Mabuhay! I’m the Suyat Dental virtual receptionist. I can check slots, book, reschedule or cancel — anytime. How can I help?',
+    'Mabuhay! I’m the Suyat Dental virtual receptionist. I can book, reschedule or cancel appointments and answer questions about our hours and services, anytime. Type, or tap the mic or Talk mode and just tell me what you need.',
   receptionistName: 'Suyat Assistant',   // the mascot's name in the UI
   receptionistImage: '/images/receptionist.webp',
   receptionistImageSmall: '/images/receptionist-128.webp',
@@ -77,7 +77,7 @@ export const BRANCHES: Branch[] = [
 ];
 
 export const QUICK_CHIPS = [
-  'Check available slots tomorrow',
   'I want to book a cleaning',
   'What are your clinic hours?',
+  'What slots are open tomorrow?',
 ] as const;

@@ -1,4 +1,6 @@
-# Suyat voice receptionist (NVIDIA Nemotron Voice Agent)
+# Suyat voice receptionist (NVIDIA Nemotron Voice Agent) — PARKED
+
+> **Parked.** The site currently ships a *chatbot with a voice* (browser speech-to-text and text-to-speech, in `web/`). This NVIDIA service is an optional later upgrade for real-time, interruptible voice; nothing here is wired into the site.
 
 A real-time voice agent (speech in → LLM + tools → speech out) that books through the same Worker as the website chat and phone line.
 

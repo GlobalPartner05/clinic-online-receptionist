@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { CLINIC } from '../config/clinic';
 import { speak, stopSpeaking, useSpeechInput } from '../hooks/useSpeech';
+import { getSessionId } from '../hooks/useChat';
 import { RemotionClip, type Clip } from './RemotionPlayer';
 import { Receptionist } from './Receptionist';
 
@@ -8,7 +9,9 @@ interface Line { who: 'you' | 'clinic'; text: string }
 
 export function CallModal({ onClose }: { onClose: () => void }) {
   const [lines, setLines] = useState<Line[]>([]);
-  const [phone, setPhone] = useState('');
+  const draftRef = useRef<unknown>(null);
+  const alive = useRef(true);
+  const micRef = useRef<{ start: () => boolean; stop: () => void } | null>(null);
   const [seconds, setSeconds] = useState(0);
   const [busy, setBusy] = useState(false);
   const [speaking, setSpeaking] = useState(false);
@@ -19,24 +22,40 @@ export function CallModal({ onClose }: { onClose: () => void }) {
   const handle = async (text: string) => {
     setLines((l) => [...l, { who: 'you', text }]);
     setBusy(true);
+    let reply = 'The line dropped. Please try again.';
+    let spoken = reply;
     try {
-      const res = await fetch('/api/calls/process', {
+      const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ SpeechResult: text, ...(phone.trim() ? { From: phone.trim() } : {}) }),
+        body: JSON.stringify({ message: text, sessionId: getSessionId(), draft: draftRef.current }),
       });
-      const data = (await res.json()) as { reply?: string };
-      const reply = data.reply ?? 'Sorry, I could not process that.';
-      setLines((l) => [...l, { who: 'clinic', text: reply }]);
-      setSpeaking(true);
-      speak(reply, () => setSpeaking(false));
+      const data = (await res.json()) as { reply?: string; speech?: string; draft?: unknown; error?: string };
+      if (res.ok && data.reply) {
+        draftRef.current = data.draft ?? null;
+        reply = data.reply;
+        spoken = data.speech ?? data.reply;
+      } else {
+        reply = spoken = data.error ?? 'Sorry, I could not process that.';
+      }
     } catch {
-      setLines((l) => [...l, { who: 'clinic', text: 'The line dropped. Please try again.' }]);
-    } finally {
-      setBusy(false);
+      /* keep the dropped-line message */
     }
+    setLines((l) => [...l, { who: 'clinic', text: reply }]);
+    setBusy(false);
+    if (!alive.current) return;
+    setSpeaking(true);
+    speak(spoken, () => {
+      if (!alive.current) return;
+      setSpeaking(false);
+      micRef.current?.start(); // a call is hands-free: listen again after the receptionist finishes
+    });
   };
-  const mic = useSpeechInput((t) => void handle(t));
+  const mic = useSpeechInput(
+    (t) => void handle(t),
+    () => setNote('I didn’t hear anything. Tap Speak when you’re ready.'),
+  );
+  micRef.current = mic;
 
   useEffect(() => {
     const id = setInterval(() => setSeconds((s) => s + 1), 1000);
@@ -66,6 +85,7 @@ export function CallModal({ onClose }: { onClose: () => void }) {
   }, []);
 
   function close() {
+    alive.current = false;
     mic.stop();
     stopSpeaking();
     onClose();
@@ -93,12 +113,10 @@ export function CallModal({ onClose }: { onClose: () => void }) {
         <div className="call-face"><Receptionist size={112} state={mic.listening ? 'listening' : speaking ? 'speaking' : busy ? 'thinking' : 'idle'} /></div>
         <RemotionClip clip={wave} className="wave" />
         <div className="transcript" role="log" aria-live="polite">
-          {lines.length === 0 && <p className="muted">Tap the microphone and speak. Your browser will ask for permission.</p>}
+          {lines.length === 0 && <p className="muted">Tap Speak and say what you need, for example “I want a cleaning next Monday”. I’ll listen again after each answer.</p>}
           {lines.map((l, i) => (<p key={i} className={l.who}><strong>{l.who === 'you' ? 'You' : 'Clinic'}:</strong> {l.text}</p>))}
           {busy && <p className="muted">…</p>}
         </div>
-        <label className="small muted" htmlFor="call-phone">Your mobile number (optional, used for booking)</label>
-        <input id="call-phone" type="tel" inputMode="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="09XX XXX XXXX" autoComplete="tel" />
         <p className="small muted" role="status">{note}</p>
         <div className="row-gap">
           <button className={`btn ${mic.listening ? 'btn-danger' : 'btn-primary'}`} onClick={toggle} aria-pressed={mic.listening}>
