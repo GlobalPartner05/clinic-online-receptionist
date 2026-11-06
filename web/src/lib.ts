@@ -32,3 +32,29 @@ export function manilaDate(plusDays = 0, now: Date = new Date()): string {
 
 export const PH_MOBILE = /^(?:\+?63|0)9\d{9}$/;
 export const isPhMobile = (v: string) => PH_MOBILE.test(v.replace(/[\s()-]/g, ''));
+
+export type Spot = 'br' | 'bl' | 'ml' | 'mr';
+const EDGE = 16;
+const CONTENT_MAX = 1180; // matches --maxw
+
+/**
+ * Where the roaming icon sits for a named spot, as top-left pixel coordinates inside the viewport.
+ * 'ml'/'mr' use the empty gutters beside the centred content when they are wide enough, otherwise fall back to the
+ * bottom corners, so the icon never covers text or the booking form on narrow screens.
+ */
+export function mascotSpot(spot: Spot, vw: number, vh: number, size: number): { x: number; y: number } {
+  const gutter = (vw - CONTENT_MAX) / 2;
+  const roomy = gutter >= size + EDGE * 2;
+  const bottom = Math.max(EDGE, vh - size - EDGE - 8);
+  const right = vw - size - EDGE;
+  switch (spot) {
+    case 'bl':
+      return { x: EDGE, y: bottom };
+    case 'ml':
+      return roomy ? { x: Math.round((gutter - size) / 2), y: Math.round(vh * 0.5 - size / 2) } : { x: EDGE, y: bottom };
+    case 'mr':
+      return roomy ? { x: Math.round(vw - gutter + (gutter - size) / 2), y: Math.round(vh * 0.42 - size / 2) } : { x: right, y: bottom };
+    default:
+      return { x: right, y: bottom };
+  }
+}

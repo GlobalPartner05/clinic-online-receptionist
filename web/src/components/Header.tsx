@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Logo } from './Logo';
 import { CLINIC } from '../config/clinic';
+import { useAssistant } from '../hooks/useAssistant';
 
 const NAV = [
   ['#services', 'Services'],
@@ -13,6 +14,7 @@ const NAV = [
 export function Header() {
   const [open, setOpen] = useState(false);
   const btn = useRef<HTMLButtonElement>(null);
+  const { setOpen: openChat } = useAssistant();
 
   useEffect(() => {
     if (!open) return;
@@ -38,6 +40,9 @@ export function Header() {
               {label}
             </a>
           ))}
+          <button type="button" className="nav-chat" onClick={() => { setOpen(false); openChat(true); }}>
+            Ask us
+          </button>
         </nav>
         <a href="#book" className="btn btn-primary header-cta">
           Book appointment

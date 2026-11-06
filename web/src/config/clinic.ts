@@ -15,7 +15,10 @@ export const CLINIC = {
   headlineAccent: 'Dental Care',
   heroSubhead: 'for a Healthier, Brighter Smile',
   heroLead: 'for a healthier, brighter smile. Book your appointment online in minutes.',
-  assistantTitle: 'Questions? Ask our virtual assistant',
+  assistantName: 'Suyat Assistant',
+  assistantIcon: '/images/chatbot-icon.webp',
+  assistantIconSmall: '/images/chatbot-icon-small.webp',
+  assistantHint: 'Hi! Need help booking? Tap me to chat.',
   welcome:
     'Mabuhay! I’m the Suyat Dental virtual assistant. I can answer questions about our hours, branches and services, and help you book, reschedule or cancel. Type, or tap the mic and just tell me what you need.',
   sessionKey: 'suyat_session_id',  // localStorage key for the chat session

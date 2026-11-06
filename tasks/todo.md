@@ -70,3 +70,10 @@ Dead code
 - [x] Primary buttons/links on accessible action colour (fixes the contrast findings)
 - [x] Chat is now a secondary helper; Base44 toggle and sound-wave strip removed from the page
 - [ ] Not done: rate limiting on /api/book and /api/chat; real-device voice test
+
+## Chatbot icon that roams the site (2026-11-06)
+- [x] Owner's tooth icon is the chatbot: floats, hops between sections on scroll (side gutters on wide screens, bottom corners otherwise), reacts to listening/speaking/thinking
+- [x] Click opens a chat popup (bottom sheet on phones); Esc closes, focus returns to the icon; conversation kept
+- [x] Accessibility: Pause control (footer + chat header, remembered), fully still under prefers-reduced-motion, 44px targets, labelled button
+- [x] Browser-verified at 1600/1280/390 px; found and fixed: pause still bobbed, popup overflowed, greeting bubble covered a card
+- [ ] Not deployed yet (site on afterhourswellness.site still has the previous version)

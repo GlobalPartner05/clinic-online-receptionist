@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { QUICK_CHIPS } from '../config/clinic';
+import { useAssistant } from '../hooks/useAssistant';
 import { useChat } from '../hooks/useChat';
 import { speak, stopSpeaking, useSpeechInput } from '../hooks/useSpeech';
 import { CallModal } from './CallModal';
@@ -13,8 +14,9 @@ const readPref = () => {
   }
 };
 
-export function ChatPanel() {
+export function ChatPanel({ embedded = false }: { embedded?: boolean }) {
   const { messages, busy, send, clear } = useChat('local');
+  const { setActivity } = useAssistant();
   const [draft, setDraft] = useState('');
   const [speaking, setSpeaking] = useState(false);
   const [callOpen, setCallOpen] = useState(false);
@@ -64,6 +66,12 @@ export function ChatPanel() {
   );
   micRef.current = mic;
 
+  // The roaming icon mirrors what the assistant is doing.
+  useEffect(() => {
+    setActivity(mic.listening ? 'listening' : speaking ? 'speaking' : busy ? 'thinking' : 'idle');
+    return () => setActivity('idle');
+  }, [mic.listening, speaking, busy, setActivity]);
+
   const setRead = (on: boolean) => {
     setReadAloud(on);
     try {
@@ -109,7 +117,7 @@ export function ChatPanel() {
   };
 
   return (
-    <div className="assistant">
+    <div className={`assistant ${embedded ? 'assistant--embedded' : ''}`}>
       <div className="assistant-head">
         <p className="muted small" aria-live="polite">
           {mic.listening ? 'Listening… go ahead and talk' : speaking ? 'Speaking…' : busy ? 'Typing…' : 'Virtual assistant · online 24/7'}

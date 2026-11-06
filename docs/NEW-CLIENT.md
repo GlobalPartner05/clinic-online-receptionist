@@ -16,6 +16,7 @@ This repo is a working sample personalised for **Suyat Dental Clinic**. To perso
 | Colours, spacing, type, motion | `web/src/styles/tokens.css` + `web/DESIGN.md` | Change the brand primitives (`--cyan`, `--red`, `--navy`, `--orange`, `--cyan-N`, `--ink-N`, `--color-action`) and re-check contrast (spec rules in DESIGN.md) |
 | Page title, description, social tags | `web/index.html` | Edit `<title>` and meta tags; update the canonical URL |
 | Logo | `web/src/components/Logo.tsx` | The wordmark text comes from `CLINIC`; replace the component with the client's transparent logo if they have one |
+| Chat icon (the roaming mascot) | `web/public/images/chatbot-icon.webp` (384px) + `chatbot-icon-small.webp` (112px); name and greeting in `CLINIC.assistantName` / `assistantHint` | Replace both files with the client's icon (transparent PNG; remove stray edge pixels) |
 | Service images | `web/public/images/services/*.webp` + `SERVICES` in `clinic.ts` | One photo per service (4:3, about 570x490), referenced by `image` in each service |
 | Hero images | `web/public/images/` | Replace `dentist-thumbs-up.webp`, `schedule-phone-mockup.webp`; then `npm run render:clips` to regenerate the poster stills |
 

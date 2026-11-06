@@ -1,4 +1,9 @@
-import { test, expect } from 'vitest';
+import { test, expect, vi } from 'vitest';
+
+// Pin "now" to a Monday (Manila) so "tomorrow" is always an open day. Without this the test fails every Saturday,
+// when tomorrow is Sunday and the clinic is closed.
+vi.useFakeTimers({ toFake: ['Date'] });
+vi.setSystemTime(new Date('2026-11-09T04:00:00Z'));
 import { makeMockDb } from './mockdb';
 import { bookAppointment } from '../src/tools';
 import { runScheduled } from '../src/scheduled';
