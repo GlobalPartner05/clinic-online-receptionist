@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Suyat Dental Clinic — Admin &amp; Reports Dashboard</title>
+  <style>
+    :root {
+      --navy: #101f3d;
+      --gold: #c38a31;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --border: #e2e8f0;
+      --text: #1e293b;
+      --muted: #64748b;
+    }
+    * { box-sizing: border-box; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); max-width: 1100px; margin: 2rem auto; padding: 0 1.5rem; }
+    header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
+    h1 { font-family: Georgia, serif; color: var(--navy); margin: 0; font-size: 1.8rem; }
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+    .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.2rem; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+    .stat-num { font-size: 1.8rem; font-weight: 700; color: var(--navy); }
+    .stat-label { font-size: 0.85rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 0.2rem; }
+    .controls { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.2rem; margin-bottom: 1.5rem; }
+    .row { display: flex; gap: 0.6rem; flex-wrap: wrap; align-items: center; }
+    input, select, button { padding: 0.5rem 0.8rem; border: 1px solid var(--border); border-radius: 8px; font: inherit; font-size: 0.9rem; }
+    button { background: var(--navy); color: white; border: none; font-weight: 600; cursor: pointer; transition: opacity 0.2s; }
+    button:hover { opacity: 0.9; }
+    button.secondary { background: white; color: var(--navy); border: 1px solid var(--border); }
+    button.gold { background: var(--gold); color: white; }
+    table { width: 100%; border-collapse: collapse; background: var(--card); border-radius: 12px; overflow: hidden; border: 1px solid var(--border); }
+    th, td { padding: 0.75rem 0.9rem; text-align: left; font-size: 0.88rem; border-bottom: 1px solid var(--border); }
+    th { background: #f1f5f9; color: var(--navy); font-weight: 700; }
+    .badge { display: inline-block; padding: 0.2rem 0.5rem; border-radius: 6px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
+    .badge-confirmed { background: #dcfce7; color: #166534; }
+    .badge-completed { background: #e0e7ff; color: #3730a3; }
+    .badge-cancelled { background: #fee2e2; color: #991b1b; }
+    .badge-no_show { background: #fef3c7; color: #92400e; }
+    .btn-action { padding: 0.3rem 0.5rem; font-size: 0.78rem; border-radius: 6px; margin-right: 0.3rem; }
+    .btn-receipt { background: #0284c7; color: white; }
+    .btn-complete { background: #16a34a; color: white; }
+    .btn-cancel { background: #dc2626; color: white; }
+    .report-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); place-items: center; z-index: 10; padding: 1rem; }
+    .report-content { background: white; max-width: 600px; width: 100%; border-radius: 16px; padding: 1.5rem; max-height: 85vh; overflow-y: auto; }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Suyat Dental Clinic — Staff Portal</h1>
+      <p style="color:var(--muted); font-size:0.9rem;">Appointment Queries, Reports &amp; Automated Reminders</p>
+    </div>
+    <div style="display:flex; gap:0.5rem;">
+      <button class="gold" id="btn-report">📊 Clinic Report</button>
+      <button class="secondary" id="btn-remind">⏰ Send Reminders</button>
+      <button class="secondary" id="btn-export">📥 Export CSV</button>
+    </div>
+  </header>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div id="stat-total" class="stat-num">0</div>
+      <div class="stat-label">Total Appointments</div>
+    </div>
+    <div class="stat-card">
+      <div id="stat-confirmed" class="stat-num" style="color:#16a34a;">0</div>
+      <div class="stat-label">Confirmed</div>
+    </div>
+    <div class="stat-card">
+      <div id="stat-completed" class="stat-num" style="color:#4f46e5;">0</div>
+      <div class="stat-label">Completed</div>
+    </div>
+    <div class="stat-card">
+      <div id="stat-cancelled" class="stat-num" style="color:#dc2626;">0</div>
+      <div class="stat-label">Cancelled</div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <div class="row">
+      <input id="pw" type="password" placeholder="Admin password" value="test" />
+      <input id="f-date" type="date" />
+      <select id="f-status">
+        <option value="">All statuses</option>
+        <option value="confirmed">confirmed</option>
+        <option value="completed">completed</option>
+        <option value="cancelled">cancelled</option>
+        <option value="no_show">no_show</option>
+      </select>
+      <input id="f-q" placeholder="Search patient name or phone" style="flex:1; min-width:180px;" />
+      <button id="load">Load Appointments</button>
+    </div>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Time</th>
+        <th>Patient</th>
+        <th>Phone</th>
+        <th>Service</th>
+        <th>Status</th>
+        <th>Actions &amp; Proof</th>
+      </tr>
+    </thead>
+    <tbody id="rows">
+      <tr><td colspan="7" style="text-align:center; color:var(--muted);">Click "Load Appointments" to fetch records</td></tr>
+    </tbody>
+  </table>
+
+  <!-- Report Modal -->
+  <div id="modal" class="report-modal">
+    <div class="report-content">
+      <h2 style="margin-top:0; color:var(--navy);">Clinic Summary Report</h2>
+      <div id="report-body" style="font-size:0.95rem; line-height:1.6; margin:1rem 0;"></div>
+      <div style="text-align:right;">
+        <button class="secondary" onclick="document.getElementById('modal').style.display='none'">Close</button>
+        <button onclick="window.print()">Print Report</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentAppointments = [];
+    const rows = document.getElementById('rows');
+    const pw = () => document.getElementById('pw').value;
+
+    async function api(path, opts = {}) {
+      const res = await fetch(path, {
+        ...opts,
+        headers: { ...(opts.headers || {}), authorization: `Bearer ${pw()}` },
+      });
+      if (res.status === 401) throw new Error('Unauthorized — check admin password');
+      return res.json();
+    }
+
+    async function load() {
+      const params = new URLSearchParams();
+      const d = document.getElementById('f-date').value;
+      const s = document.getElementById('f-status').value;
+      const q = document.getElementById('f-q').value.trim();
+      if (d) params.set('date', d);
+      if (s) params.set('status', s);
+      if (q) params.set('q', q);
+
+      const data = await api(`/api/admin/appointments?${params}`);
+      currentAppointments = data.appointments || [];
+
+      // Update statistics
+      let confirmed = 0, completed = 0, cancelled = 0;
+      for (const a of currentAppointments) {
+        if (a.status === 'confirmed') confirmed++;
+        else if (a.status === 'completed') completed++;
+        else if (a.status === 'cancelled') cancelled++;
+      }
+      document.getElementById('stat-total').textContent = currentAppointments.length;
+      document.getElementById('stat-confirmed').textContent = confirmed;
+      document.getElementById('stat-completed').textContent = completed;
+      document.getElementById('stat-cancelled').textContent = cancelled;
+
+      rows.innerHTML = '';
+      if (currentAppointments.length === 0) {
+        rows.innerHTML = '<tr><td colspan="7" style="text-align:center; color:var(--muted);">No matching appointments found.</td></tr>';
+        return;
+      }
+
+      for (const a of currentAppointments) {
+        const tr = document.createElement('tr');
+        tr.innerHTML =
+          `<td><strong>${a.appointment_date}</strong></td><td>${a.appointment_time}</td>` +
+          `<td>${a.patient_name}</td><td>${a.patient_phone}</td>` +
+          `<td>${a.service_type}</td>` +
+          `<td><span class="badge badge-${a.status}">${a.status}</span></td>` +
+          `<td></td>`;
+        const td = tr.lastChild;
+
+        // Digital Receipt Button
+        const btnReceipt = document.createElement('button');
+        btnReceipt.className = 'btn-action btn-receipt';
+        btnReceipt.textContent = '📄 Receipt';
+        btnReceipt.title = 'View Official Proof of Appointment';
+        btnReceipt.onclick = () => window.open(`/receipt.html?id=${a.id}`, '_blank');
+        td.appendChild(btnReceipt);
+
+        if (a.status === 'confirmed') {
+          const btnComp = document.createElement('button');
+          btnComp.className = 'btn-action btn-complete';
+          btnComp.textContent = '✓ Done';
+          btnComp.onclick = async () => {
+            await api(`/api/admin/appointments/${a.id}`, {
+              method: 'PATCH', headers: { 'content-type': 'application/json' },
+              body: JSON.stringify({ status: 'completed' }),
+            });
+            await load();
+          };
+          td.appendChild(btnComp);
+
+          const btnCanc = document.createElement('button');
+          btnCanc.className = 'btn-action btn-cancel';
+          btnCanc.textContent = '✕ Cancel';
+          btnCanc.onclick = async () => {
+            if (confirm('Cancel this appointment slot?')) {
+              await api(`/api/admin/appointments/${a.id}`, {
+                method: 'PATCH', headers: { 'content-type': 'application/json' },
+                body: JSON.stringify({ status: 'cancelled' }),
+              });
+              await load();
+            }
+          };
+          td.appendChild(btnCanc);
+        }
+
+        rows.appendChild(tr);
+      }
+    }
+
+    document.getElementById('load').onclick = () => load().catch((e) => alert(e.message));
+
+    // Clinic Report
+    document.getElementById('btn-report').onclick = async () => {
+      try {
+        const d = document.getElementById('f-date').value;
+        const res = await api(`/api/admin/reports${d ? `?date=${d}` : ''}`);
+        const r = res.report;
+        const breakdown = Object.entries(r.servicesBreakdown || {})
+          .map(([k, v]) => `<li><strong>${k}:</strong> ${v}</li>`)
+          .join('');
+        document.getElementById('report-body').innerHTML = `
+          <p><strong>Report Date:</strong> ${r.date}</p>
+          <p><strong>Total Appointments:</strong> ${r.totalBookings}</p>
+          <ul>
+            <li>Confirmed: <strong>${r.confirmed}</strong></li>
+            <li>Completed: <strong>${r.completed}</strong></li>
+            <li>Cancelled: <strong>${r.cancelled}</strong></li>
+          </ul>
+          <h4>Service Breakdown</h4>
+          <ul>${breakdown || '<li>None</li>'}</ul>
+        `;
+        document.getElementById('modal').style.display = 'grid';
+      } catch (e) {
+        alert(e.message);
+      }
+    };
+
+    // Send Reminders
+    document.getElementById('btn-remind').onclick = async () => {
+      if (confirm('Send automated appointment reminders for tomorrow?')) {
+        try {
+          const res = await api('/api/admin/reminders/send', { method: 'POST' });
+          alert(`Automated reminders sent! ${res.reminded} patient(s) notified for ${res.date}.`);
+        } catch (e) {
+          alert('Failed to send reminders: ' + e.message);
+        }
+      }
+    };
+
+    // Export CSV
+    document.getElementById('btn-export').onclick = () => {
+      if (!currentAppointments.length) return alert('No appointments loaded to export.');
+      const headers = ['ID', 'Date', 'Time', 'Patient', 'Phone', 'Email', 'Service', 'Status'];
+      const rows = currentAppointments.map(a => [
+        a.id, a.appointment_date, a.appointment_time,
+        `"${a.patient_name}"`, a.patient_phone, a.patient_email || '',
+        `"${a.service_type}"`, a.status
+      ]);
+      const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `suyat-appointments-${new Date().toISOString().slice(0, 10)}.csv`;
+      a.click();
+    };
+
+    // Initial load
+    load().catch(() => {});
+  </script>
+</body>
+</html>

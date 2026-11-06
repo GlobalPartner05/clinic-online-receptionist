@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Suyat Dental Clinic patient portal and local receptionist preview." />
+  <title>Suyat Dental Clinic | Patient Portal</title>
+  <style>
+    :root{--navy:#101f3d;--muted:#5b687b;--gold:#f8bc5b;--cream:#f7f5ef;--line:#e2e4e5;--white:#fff;--blue:#e7f2f5}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--cream);color:var(--navy);font:15px/1.6 system-ui,-apple-system,Segoe UI,sans-serif}a{color:inherit}.wrap{max-width:1200px;margin:auto;padding:0 24px}header{position:sticky;top:0;z-index:3;background:rgba(247,245,239,.97);border-bottom:1px solid var(--line)}.nav{height:88px;display:flex;align-items:center;justify-content:space-between;gap:20px}.logo{width:175px;max-height:72px;object-fit:contain;mix-blend-mode:multiply}nav{display:flex;align-items:center;gap:26px}nav a{font-size:13px;font-weight:700;text-decoration:none}a:hover{color:#a16b1f}.button,button{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:12px;padding:13px 19px;background:var(--navy);color:white;font:inherit;font-weight:750;text-decoration:none;cursor:pointer}.button:hover,button:hover{color:white;background:#263b5d}.button.gold{background:var(--gold);color:var(--navy)}.button.light{background:white;color:var(--navy);border:1px solid #d3d8dc}.button:focus-visible,button:focus-visible,a:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid #df951b;outline-offset:3px}.hero{padding:65px 0 70px}.hero-grid{display:grid;grid-template-columns:1.05fr .95fr;align-items:center;gap:65px}.pill{display:inline-flex;background:#ffedc9;border:1px solid #f5d59c;border-radius:30px;padding:6px 12px;font-size:12px;font-weight:700}.eyebrow{text-transform:uppercase;letter-spacing:.16em;font-size:11px;font-weight:800;color:#ad7426}h1,h2,h3{font-family:Georgia,serif;line-height:1.12}h1{font-size:clamp(42px,5vw,67px);letter-spacing:-.035em;margin:20px 0}h1 em{color:#c38a31;font-weight:400}h2{font-size:clamp(32px,4vw,45px);margin:10px 0 15px}h3{font-size:22px;margin:0 0 10px}.lead{font-size:17px;color:var(--muted);max-width:570px}.actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:25px}.photo{background:white;padding:10px;border:1px solid #e8e5dd;border-radius:24px;box-shadow:0 22px 60px #17274015}.photo img{display:block;width:100%;height:420px;object-fit:cover;object-position:center 35%;border-radius:17px}.photo-caption{padding:14px 10px 5px;display:flex;justify-content:space-between;gap:12px;align-items:center}.photo-caption span{color:var(--muted);font-size:13px}.section{padding:72px 0}.white{background:#fff}.section-top{max-width:680px;margin-bottom:28px}.section-top p,.muted{color:var(--muted)}.branch-grid,.service-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}.card{background:white;border:1px solid var(--line);border-radius:18px;padding:26px}.branch-grid .card:nth-child(2){background:#eff7f9}.tag{display:inline-block;background:#ffedc9;color:#755017;padding:4px 10px;border-radius:30px;font-size:11px;text-transform:uppercase;letter-spacing:.08em;font-weight:800}.card h3{margin-top:18px}.card p{color:var(--muted);margin-bottom:0}.service-grid{grid-template-columns:repeat(3,1fr)}.service-grid .card{background:var(--cream)}.service-grid b{color:#b57f31}.demo-section{background:#eae9e1}.demo-grid{display:grid;grid-template-columns:1fr 1fr;gap:30px;align-items:start}.notice{padding:15px 18px;background:#fff4d8;border-left:4px solid #e4ab4c;border-radius:5px;font-size:13px}.chat-card{background:white;border:1px solid var(--line);border-radius:20px;overflow:hidden}.chat-head{background:var(--navy);color:white;padding:20px 23px}.chat-head strong{display:block}.chat-head span{color:#c3cedb;font-size:12px}.chat-body{padding:20px}.bubble{padding:12px 14px;background:#f2f4f5;border-radius:12px;margin:9px 0;overflow-wrap:anywhere}.bubble.user{background:#fff1d4}.chat-log{max-height:230px;overflow:auto}.chat-form{display:flex;gap:8px;margin-top:15px}.chat-form input{flex:1;min-width:0;padding:12px;border:1px solid #cbd3d8;border-radius:10px;font:inherit}.chat-form button:disabled{opacity:.6}.status{min-height:1.5em;font-size:12px;color:var(--muted)}.steps{display:flex;gap:15px;align-items:start;margin:17px 0}.steps b{display:grid;place-items:center;background:#ffebc4;border-radius:10px;width:37px;height:37px;flex:none}.steps p{margin:0;color:var(--muted)}footer{background:var(--navy);color:#eff3f5;padding:38px 0}.foot{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}footer p{font-size:13px;color:#b9c6d4}footer a{font-weight:700}@media(max-width:800px){.hero-grid,.demo-grid{grid-template-columns:1fr;gap:30px}.hero{padding:42px 0}.photo img{height:360px}.service-grid{grid-template-columns:1fr 1fr}nav a:not(.button){display:none}.section{padding:52px 0}}@media(max-width:520px){.wrap{padding:0 18px}.nav{height:72px}.logo{width:140px}nav .button{font-size:12px;padding:10px}.branch-grid,.service-grid{grid-template-columns:1fr}.photo img{height:300px}.chat-form{flex-direction:column}}
+  </style>
+</head>
+<body>
+  <header><div class="wrap nav"><a href="#top" aria-label="Suyat Dental Clinic home"><img class="logo" src="/images/suyat-logo.png" alt="Suyat Dental Clinic" /></a><nav aria-label="Main navigation"><a href="#branches">Branches &amp; hours</a><a href="#services">Services</a><a href="#receptionist">Receptionist</a><a class="button gold" href="#receptionist">Patient portal →</a></nav></div></header>
+  <main id="top">
+    <section class="hero"><div class="wrap hero-grid"><div><span class="pill">✦ A warmer welcome to dental care</span><h1>A healthy smile, <em>made personal.</em></h1><p class="lead">Welcome to Suyat Dental Clinic. Explore our branches and services, and try the local receptionist preview.</p><div class="actions"><a class="button" href="#receptionist">Explore the patient portal →</a><a class="button light" href="#branches">See clinic branches</a></div></div><div class="photo"><img src="/images/suyat-dentist.png" alt="Smiling person in a dental office" /><div class="photo-caption"><strong>Suyat Dental Clinic</strong><span>Care for every smile</span></div></div></div></section>
+    <section class="section white" id="branches"><div class="wrap"><div class="section-top"><div class="eyebrow">Find your clinic</div><h2>Two locations, one caring team.</h2><p>Branch details are taken from the supplied clinic material. Please confirm hours and availability with the clinic before visiting.</p></div><div class="branch-grid"><article class="card"><span class="tag">Monday – Tuesday</span><h3>San Nicolas, Pangasinan</h3><p>Sta. Maria West, San Nicolas, Pangasinan</p><p><strong>9:00 AM – 6:00 PM</strong></p></article><article class="card"><span class="tag">Wednesday – Saturday</span><h3>Project 6, Quezon City</h3><p>111 – B2 Rd 3, Cor. Road 7, Project 6, Q.C.</p><p><strong>10:00 AM – 6:00 PM</strong></p></article></div></div></section>
+    <section class="section" id="services"><div class="wrap"><div class="section-top"><div class="eyebrow">A smile worth sharing</div><h2>Care for every stage.</h2><p>Ask the clinic about treatment suitability, availability and current pricing.</p></div><div class="service-grid"><article class="card"><b>01 /</b><h3>Cleaning &amp; checkups</h3><p>Routine examinations and preventive dental care.</p></article><article class="card"><b>02 /</b><h3>Restorations</h3><p>Discuss fillings and other restorative treatment options.</p></article><article class="card"><b>03 /</b><h3>Braces &amp; consultations</h3><p>Explore orthodontic care and consultation options.</p></article><article class="card"><b>04 /</b><h3>Teeth whitening</h3><p>Ask the dental team about whitening options.</p></article><article class="card"><b>05 /</b><h3>Extractions</h3><p>Consult the clinic about extraction and surgical care.</p></article><article class="card"><b>06 /</b><h3>Dental concerns</h3><p>Contact the clinic directly for urgent dental needs.</p></article></div></div></section>
+<section class="section demo-section" id="receptionist"><div class="wrap demo-grid"><div><div class="eyebrow">Patient portal preview</div><h2>Meet your virtual receptionist.</h2><p class="muted">Check slots, book appointments, reschedule, and download official proof of appointments 24/7.</p><div class="notice"><strong>24/7 Virtual Clinic Assistant.</strong> Supports instant booking, appointment proofs, SMS/call reminders, and staff reporting.</div><div class="steps"><b>01</b><p><strong>Choose your branch &amp; slot</strong><br />San Nicolas (Mon-Tue) or Project 6 Quezon City (Wed-Sat).</p></div><div class="steps"><b>02</b><p><strong>Instant confirmation &amp; digital receipt</strong><br />Receive your official reference number and printable proof.</p></div><div class="steps"><b>03</b><p><strong>Automated reminders</strong><br />We notify you 24 hours prior via SMS and email.</p></div><div style="display:flex; gap:10px; flex-wrap:wrap;"><a href="/admin.html" class="button light">Open Staff Admin &amp; Reports →</a><a href="/receipt.html" class="button light" target="_blank">Sample Proof Receipt 📄</a></div></div><div class="chat-card"><div class="chat-head" style="display:flex; justify-content:space-between; align-items:center;"><div><strong>Suyat Receptionist Assistant</strong><span>24/7 Patient Booking &amp; Queries</span></div><button type="button" onclick="simulateVoiceCall()" style="padding:6px 12px; font-size:12px; background:var(--gold); border-radius:20px; color:var(--navy);">📞 Call Receptionist</button></div><div class="chat-body"><div class="bubble">Mabuhay! I am your 24/7 dental assistant. How can I assist you with your booking today?</div><div id="log" class="chat-log" role="log" aria-live="polite" aria-label="Demo chat messages"></div><div class="chips" style="display:flex; gap:6px; flex-wrap:wrap; margin:10px 0;"><button type="button" class="button light" style="padding:6px 10px; font-size:12px; border-radius:15px;" onclick="quickMsg('What slots are open tomorrow?')">📅 Slots Tomorrow</button><button type="button" class="button light" style="padding:6px 10px; font-size:12px; border-radius:15px;" onclick="quickMsg('Book cleaning tomorrow 10:00, name Ana 09170000001')">🩺 Book Cleaning</button><button type="button" class="button light" style="padding:6px 10px; font-size:12px; border-radius:15px;" onclick="quickMsg('Send receipt for 09170000001')">📄 Proof / Receipt</button><button type="button" class="button light" style="padding:6px 10px; font-size:12px; border-radius:15px;" onclick="quickMsg('Reschedule 09170000001 to tomorrow at 14:00')">🔄 Reschedule</button></div><form id="chat" class="chat-form"><label for="msg" hidden>Demo message</label><input id="msg" placeholder="Ask about slots, book, reschedule, or request a receipt" autocomplete="off" required /><button type="submit">Send</button></form><div id="status" class="status" aria-live="polite"></div></div></div></div></section>
+  </main>
+  <footer><div class="wrap foot"><div><strong>Suyat Dental Clinic</strong><p>San Nicolas, Pangasinan · Project 6, Quezon City</p></div><div><a href="#branches">Branches &amp; hours</a><p>Confirm clinic information before visiting.</p></div></div></footer>
+  <script>
+    const log = document.getElementById('log');
+    const form = document.getElementById('chat');
+    const input = document.getElementById('msg');
+    const status = document.getElementById('status');
+    let sessionId;
+    try { sessionId = localStorage.getItem('dental-session') || crypto.randomUUID(); localStorage.setItem('dental-session', sessionId); }
+    catch { sessionId = crypto.randomUUID(); }
+
+    function add(text, cls, receiptUrl) {
+      const div = document.createElement('div');
+      div.className = `bubble ${cls}`;
+      div.textContent = text;
+      const m = text.match(/\/receipt\.html\?id=[\w-]+/);
+      const url = receiptUrl || (m ? m[0] : null);
+      if (url) {
+        const btn = document.createElement('a');
+        btn.href = url;
+        btn.target = '_blank';
+        btn.textContent = '📄 View Official Proof of Appointment Receipt →';
+        btn.style.display = 'inline-block';
+        btn.style.marginTop = '8px';
+        btn.style.padding = '8px 12px';
+        btn.style.background = '#101f3d';
+        btn.style.color = '#fff';
+        btn.style.borderRadius = '8px';
+        btn.style.textDecoration = 'none';
+        btn.style.fontWeight = 'bold';
+        btn.style.fontSize = '12px';
+        div.appendChild(document.createElement('br'));
+        div.appendChild(btn);
+      }
+      log.appendChild(div);
+      log.scrollTop = log.scrollHeight;
+    }
+
+    async function sendChat(message) {
+      add(message, 'user');
+      const button = form.querySelector('button');
+      button.disabled = true;
+      status.textContent = 'Assistant is typing…';
+      try {
+        const res = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ message, sessionId }),
+        });
+        const data = await res.json();
+        add(data.reply ?? data.error ?? 'Sorry, something went wrong.', 'bot', data.booked?.receipt_url);
+      } catch {
+        add('The local chat service is unavailable. Please try again.', 'bot');
+      } finally {
+        button.disabled = false;
+        status.textContent = '';
+      }
+    }
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const message = input.value.trim();
+      if (!message) return;
+      input.value = '';
+      sendChat(message);
+    });
+
+    window.quickMsg = (text) => {
+      input.value = text;
+      form.requestSubmit();
+    };
+
+    window.simulateVoiceCall = async () => {
+      add('📞 [Incoming Call from Patient at +639170000001]', 'user');
+      try {
+        const res = await fetch('/api/calls/incoming', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ From: '+639170000001' }),
+        });
+        const data = await res.json();
+        add(`📞 [AI Receptionist Voice Answer]: "${data.message}"`, 'bot');
+      } catch {
+        add('Voice call simulator unavailable.', 'bot');
+      }
+    };
+  </script>
+</body>
+</html>
