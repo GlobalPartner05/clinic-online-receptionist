@@ -56,3 +56,8 @@ Dead code
 - [x] UI: Read replies aloud (persisted), Talk mode (hands-free), Stop speaking, barge-in, best English voice, call modal uses the same chat brain
 - [x] Browser test with scripted fake mic/speaker: full hands-free booking
 - [ ] Not verified: real microphone/speaker, other browsers (Firefox has no SpeechRecognition), accents/noise accuracy
+
+## Deployed (2026-11-06)
+- [x] `npm run deploy:bundled` -> dental-ai-assistant, version edbe0e5a (previous: 86395fd1). Verified active at 100% via API.
+- [ ] Live URL is behind Cloudflare Access (login redirect): owner must add a bypass/remove the policy for public use. Not changed by me.
+- [ ] Not set: BASE44_CONVERSATION_ID (Base44 tab falls back to local bot), VOICE_TOOL_SECRET (voice tool endpoint disabled: correct). Rotate leaked Base44 key.

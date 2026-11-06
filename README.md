@@ -96,6 +96,13 @@ Pushing to `main` will automatically trigger `.github/workflows/deploy.yml` to r
 
 > **Using this as a client sample?** See [`docs/NEW-CLIENT.md`](docs/NEW-CLIENT.md) for the personalisation checklist.
 
+## 🚀 Deploying
+```bash
+npm run deploy           # standard: build web/dist and `wrangler deploy` (Cloudflare serves the static files)
+npm run deploy:bundled   # same app, with the site packaged inside the Worker (wrangler.bundled.jsonc)
+```
+Use `deploy:bundled` where the Static Assets upload is blocked (e.g. a restricted network proxy). It restores `src/embedded-assets.ts` afterwards; never commit the generated version. Rollback: `npx wrangler rollback` or the Cloudflare dashboard (Workers → Deployments).
+
 ## 🎬 Frontend (`web/`)
 
 ```bash
