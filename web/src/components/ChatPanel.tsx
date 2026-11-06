@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { QUICK_CHIPS } from '../config/clinic';
+import { CLINIC, QUICK_CHIPS } from '../config/clinic';
 import { useChat } from '../hooks/useChat';
 import { speak, stopSpeaking, useSpeechInput } from '../hooks/useSpeech';
 import { RemotionClip, type Clip } from './RemotionPlayer';
@@ -75,7 +75,7 @@ export function ChatPanel({ pending }: { pending: Pending | null }) {
           </p>
         </div>
         <div className="seg" role="group" aria-label="Assistant">
-          <button aria-pressed={mode === 'local'} onClick={() => setMode('local')}>Suyat</button>
+          <button aria-pressed={mode === 'local'} onClick={() => setMode('local')}>{CLINIC.shortName}</button>
           <button aria-pressed={mode === 'base44'} onClick={() => setMode('base44')}>Base44</button>
         </div>
       </div>

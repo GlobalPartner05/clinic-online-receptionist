@@ -3,6 +3,7 @@ import { AbsoluteFill, Img, interpolate, spring, staticFile, useCurrentFrame, us
 import { C, FONT, FONT_DISPLAY } from './theme';
 import { Tooth } from './Tooth';
 import { Logo } from '../components/Logo';
+import { CLINIC } from '../config/clinic';
 
 export const HERO_DURATION = 150;
 
@@ -46,13 +47,14 @@ export const HeroReel: React.FC = () => {
       <div style={{ position: 'absolute', left: 56 * u, top: 40 * u, opacity: logo, transform: `scale(${interpolate(logo, [0, 1], [0.8, 1])})`, transformOrigin: 'left center'  }}><Logo height={84 * u} /></div>
 
       <div style={{ position: 'absolute', left: 56 * u, top: (vertical ? 190 : 190) * u, width: (vertical ? 960 : 640) * u, fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: (vertical ? 108 : 78) * u, lineHeight: 1.02 }}>
-        <Word text="Comprehensive" delay={8} />
+        <Word text={CLINIC.headlineLead} delay={8} />
         <br />
-        <Word text="Dental" delay={16} />
-        <Word text="Care" delay={22} />
+        {CLINIC.headlineAccent.split(' ').map((w, i) => (
+          <Word key={w + i} text={w} delay={16 + i * 6} />
+        ))}
         <div style={{ height: 6 * u, width: `${underline}%`, maxWidth: 560 * u, marginTop: 14 * u, borderRadius: 6, background: `linear-gradient(90deg, ${C.red}, ${C.cyan})` }} />
         <div style={{ fontSize: (vertical ? 50 : 36) * u, fontWeight: 500, fontStyle: 'italic', marginTop: 20 * u, color: C.navy, opacity: interpolate(frame, [50, 75], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }) }}>
-          for a Healthier, Brighter Smile
+          {CLINIC.heroSubhead}
         </div>
       </div>
 
@@ -94,7 +96,7 @@ export const HeroReel: React.FC = () => {
           transformOrigin: 'left center',
         }}
       >
-        🕒 After-Hours Appointments Available
+        🕒 {CLINIC.badge}
       </div>
     </AbsoluteFill>
   );

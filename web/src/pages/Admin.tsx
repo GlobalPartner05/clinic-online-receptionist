@@ -2,6 +2,7 @@ import { useCallback, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { toCsv } from '../lib';
 import { Logo } from '../components/Logo';
+import { CLINIC } from '../config/clinic';
 
 interface Appt {
   id: string;
@@ -63,7 +64,7 @@ export default function Admin() {
       ...appts.map((a) => [a.id, a.appointment_date, a.appointment_time, a.patient_name, a.patient_phone, a.patient_email, a.service_type, a.status])]);
     const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
     const a = document.createElement('a');
-    a.href = url; a.download = `suyat-appointments-${new Date().toISOString().slice(0, 10)}.csv`; a.click();
+    a.href = url; a.download = `${CLINIC.csvPrefix}-appointments-${new Date().toISOString().slice(0, 10)}.csv`; a.click();
     URL.revokeObjectURL(url);
   };
 

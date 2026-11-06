@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Logo } from './Logo';
+import { CLINIC } from '../config/clinic';
 
 const NAV = [
   ['#services', 'Services'],
@@ -28,7 +29,7 @@ export function Header() {
   return (
     <header className="site-header">
       <div className="container header-row">
-        <Link to="/" className="brand" aria-label="Suyat Dental Clinic home">
+        <Link to="/" className="brand" aria-label={`${CLINIC.name} home`}>
           <Logo height={46} />
         </Link>
         <nav id="main-nav" className={`nav ${open ? 'open' : ''}`} aria-label="Main">

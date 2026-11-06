@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { CLINIC } from '../config/clinic';
 
 export interface ChatMessage {
   id: number;
@@ -9,7 +10,7 @@ export interface ChatMessage {
 
 export type AgentMode = 'local' | 'base44';
 
-const SESSION_KEY = 'suyat_session_id';
+const SESSION_KEY = CLINIC.sessionKey;
 
 function safeStorage(): Storage | null {
   try {
@@ -40,7 +41,7 @@ export function extractReceiptUrl(text: string, bookedUrl?: string): string | un
 const WELCOME: ChatMessage = {
   id: 0,
   role: 'bot',
-  text: 'Mabuhay! I’m the Suyat Dental virtual receptionist. I can check slots, book, reschedule or cancel — anytime. How can I help?',
+  text: CLINIC.welcome,
 };
 
 export function useChat(initialMode: AgentMode = 'local') {

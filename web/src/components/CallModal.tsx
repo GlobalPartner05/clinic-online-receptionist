@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { CLINIC } from '../config/clinic';
 import { speak, stopSpeaking, useSpeechInput } from '../hooks/useSpeech';
 import { RemotionClip, type Clip } from './RemotionPlayer';
 
@@ -87,7 +88,7 @@ export function CallModal({ onClose }: { onClose: () => void }) {
   return (
     <div className="modal-backdrop" onMouseDown={(e) => e.target === e.currentTarget && close()}>
       <div ref={dlg} className="modal call" role="dialog" aria-modal="true" aria-labelledby="call-title">
-        <h3 id="call-title">Suyat Dental — virtual call <span className="muted" aria-label={`Call time ${mm}:${ss}`}>{mm}:{ss}</span></h3>
+        <h3 id="call-title">{CLINIC.name} — virtual call <span className="muted" aria-label={`Call time ${mm}:${ss}`}>{mm}:{ss}</span></h3>
         <RemotionClip clip={wave} className="wave" />
         <div className="transcript" role="log" aria-live="polite">
           {lines.length === 0 && <p className="muted">Tap the microphone and speak. Your browser will ask for permission.</p>}

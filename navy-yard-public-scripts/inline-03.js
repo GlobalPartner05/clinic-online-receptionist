@@ -1,1 +1,0 @@
-var sbiajaxurl = "https://navyyarddental.com/wp-admin/admin-ajax.php";

@@ -8,7 +8,7 @@ export const HERO_CLIP: Clip = {
   width: 1280,
   height: 720,
   poster: '/images/posters/hero.webp',
-  alt: 'Animated Suyat Dental Clinic introduction: Comprehensive dental care for a healthier, brighter smile.',
+  alt: `Animated ${CLINIC.name} introduction: ${CLINIC.tagline}.`,
 };
 export const STEPS_CLIP: Clip = {
   id: 'BookingSteps',
@@ -25,9 +25,9 @@ export function Hero({ onBook }: { onBook: (prompt?: string) => void }) {
         <div className="hero-copy">
           <span className="pill">🕒 {CLINIC.badge}</span>
           <h1>
-            Comprehensive <span className="accent">Dental Care</span>
+            {CLINIC.headlineLead} <span className="accent">{CLINIC.headlineAccent}</span>
           </h1>
-          <p className="lead">for a healthier, brighter smile — book in minutes with our 24/7 AI receptionist.</p>
+          <p className="lead">{CLINIC.heroLead}</p>
           <div className="hero-actions">
             <button className="btn btn-primary" onClick={() => onBook()}>
               Book an appointment

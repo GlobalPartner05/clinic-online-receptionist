@@ -94,6 +94,8 @@ Pushing to `main` will automatically trigger `.github/workflows/deploy.yml` to r
 
 ---
 
+> **Using this as a client sample?** See [`docs/NEW-CLIENT.md`](docs/NEW-CLIENT.md) for the personalisation checklist.
+
 ## 🎬 Frontend (`web/`)
 
 ```bash

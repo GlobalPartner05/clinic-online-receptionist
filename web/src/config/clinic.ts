@@ -1,7 +1,24 @@
+/**
+ * PERSONALISATION POINT 1 of 3 — everything a visitor reads about the clinic.
+ * To brand the site for a new client, edit this file, `tokens.css` (colours) and `index.html` (page title/meta).
+ * See docs/NEW-CLIENT.md for the full checklist (including the few backend strings).
+ */
 export const CLINIC = {
   name: 'Suyat Dental Clinic',
+  shortName: 'Suyat',
+  wordmark: 'Suyat',               // script wordmark in the Logo component
+  descriptor: 'DENTAL CLINIC',     // small caps line under the wordmark
+  domain: 'suyatdental.com',
   tagline: 'Comprehensive Dental Care for a Healthier, Brighter Smile',
   badge: 'After-Hours Appointments Available',
+  headlineLead: 'Comprehensive',
+  headlineAccent: 'Dental Care',
+  heroSubhead: 'for a Healthier, Brighter Smile',
+  heroLead: 'for a healthier, brighter smile — book in minutes with our 24/7 AI receptionist.',
+  welcome:
+    'Mabuhay! I’m the Suyat Dental virtual receptionist. I can check slots, book, reschedule or cancel — anytime. How can I help?',
+  sessionKey: 'suyat_session_id',  // localStorage key for the chat session
+  csvPrefix: 'suyat',              // admin CSV export file name prefix
 } as const;
 
 export interface Service {
