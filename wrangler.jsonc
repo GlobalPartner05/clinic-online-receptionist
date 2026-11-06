@@ -1,8 +1,15 @@
 {
+  "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "dental-ai-assistant",
   "main": "src/server.ts",
   "compatibility_date": "2026-10-15",
   "compatibility_flags": ["nodejs_compat"],
+  "send_email": [
+    {
+      "name": "EMAIL",
+      "remote": true
+    }
+  ],
   "assets": {
     "directory": "./public",
     "binding": "ASSETS"
