@@ -1,7 +1,6 @@
 import React from 'react';
 import { AbsoluteFill, Img, interpolate, spring, staticFile, useCurrentFrame, useVideoConfig } from 'remotion';
 import { C, FONT, FONT_DISPLAY } from './theme';
-import { Tooth } from './Tooth';
 import { Logo } from '../components/Logo';
 import { CLINIC } from '../config/clinic';
 
@@ -76,7 +75,7 @@ export const HeroReel: React.FC = () => {
       </div>
 
       <div style={{ position: 'absolute', right: (vertical ? 60 : 480) * u, top: (vertical ? 470 : 80) * u, transform: `translateY(${float}px) scale(${tooth}) rotate(${interpolate(tooth, [0, 1], [-30, 0])}deg)` }}>
-        <Tooth size={(vertical ? 220 : 170) * u} />
+        <Img src={staticFile('images/receptionist.webp')} style={{ width: (vertical ? 220 : 170) * u, height: (vertical ? 220 : 170) * u, filter: 'drop-shadow(0 12px 24px rgba(0,180,216,.45))' }} />
       </div>
 
       <div

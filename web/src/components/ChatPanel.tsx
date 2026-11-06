@@ -4,6 +4,7 @@ import { useChat } from '../hooks/useChat';
 import { speak, stopSpeaking, useSpeechInput } from '../hooks/useSpeech';
 import { RemotionClip, type Clip } from './RemotionPlayer';
 import { CallModal } from './CallModal';
+import { Receptionist, type ReceptionistState } from './Receptionist';
 
 export interface Pending {
   text: string;
@@ -58,6 +59,7 @@ export function ChatPanel({ pending }: { pending: Pending | null }) {
   useEffect(() => () => stopSpeaking(), []);
 
   const state = mic.listening ? 'listening' : speaking ? 'speaking' : 'idle';
+  const face: ReceptionistState = busy ? 'thinking' : state;
 
   const toggleMic = () => {
     setMicNote('');
@@ -68,11 +70,14 @@ export function ChatPanel({ pending }: { pending: Pending | null }) {
   return (
     <div className="assistant">
       <div className="assistant-head">
-        <div>
-          <h3>24/7 AI Receptionist</h3>
-          <p className="muted small" aria-live="polite">
-            {mic.listening ? 'Listening…' : speaking ? 'Speaking…' : busy ? 'Typing…' : 'Online now'}
-          </p>
+        <div className="assistant-id">
+          <Receptionist size={64} state={face} />
+          <div>
+            <h3>{CLINIC.receptionistName}</h3>
+            <p className="muted small" aria-live="polite">
+              24/7 AI receptionist · {mic.listening ? 'Listening…' : speaking ? 'Speaking…' : busy ? 'Typing…' : 'Online now'}
+            </p>
+          </div>
         </div>
         <div className="seg" role="group" aria-label="Assistant">
           <button aria-pressed={mode === 'local'} onClick={() => setMode('local')}>{CLINIC.shortName}</button>
@@ -85,6 +90,7 @@ export function ChatPanel({ pending }: { pending: Pending | null }) {
       <div ref={log} className="chat-log" role="log" aria-live="polite" aria-label="Conversation">
         {messages.map((m) => (
           <div key={m.id} className={`msg ${m.role}`}>
+            {m.role !== 'user' && <Receptionist size={32} ring={false} />}
             <span className="bubble">
               {m.text}
               {m.receiptUrl && (
@@ -97,6 +103,7 @@ export function ChatPanel({ pending }: { pending: Pending | null }) {
         ))}
         {busy && (
           <div className="msg bot" aria-hidden>
+            <Receptionist size={32} ring={false} state="thinking" />
             <span className="bubble typing"><i /><i /><i /></span>
           </div>
         )}

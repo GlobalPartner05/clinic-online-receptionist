@@ -2,6 +2,8 @@ import { useCallback, useState } from 'react';
 import { Header } from '../components/Header';
 import { Branches, Footer, Hero, HowItWorks, Services } from '../components/Sections';
 import { ChatPanel, type Pending } from '../components/ChatPanel';
+import { Receptionist } from '../components/Receptionist';
+import { CLINIC } from '../config/clinic';
 
 export default function Landing() {
   const [pending, setPending] = useState<Pending | null>(null);
@@ -27,6 +29,10 @@ export default function Landing() {
         </section>
         <Branches />
       </main>
+      <button className="fab" onClick={() => book()} aria-label={`Chat with ${CLINIC.receptionistName} to book an appointment`}>
+        <Receptionist size={56} ring={false} />
+        <span className="fab__label">Need help booking?</span>
+      </button>
       <Footer />
     </>
   );

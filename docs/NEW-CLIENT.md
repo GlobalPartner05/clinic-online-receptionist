@@ -16,6 +16,7 @@ This repo is a working sample personalised for **Suyat Dental Clinic**. To perso
 | Colours, spacing, type, motion | `web/src/styles/tokens.css` + `web/DESIGN.md` | Change the brand primitives (`--cyan`, `--red`, `--navy`, `--orange`, `--cyan-N`, `--ink-N`, `--color-action`) and re-check contrast (spec rules in DESIGN.md) |
 | Page title, description, social tags | `web/index.html` | Edit `<title>` and meta tags; update the canonical URL |
 | Logo | `web/src/components/Logo.tsx` | The wordmark text comes from `CLINIC`; replace the component with the client's transparent logo if they have one |
+| Receptionist mascot | `web/public/images/receptionist.webp` (512px) + `receptionist-128.webp`; name in `CLINIC.receptionistName` | Replace both files with the client's mascot (transparent PNG → webp; clean any edge specks) and rename it |
 | Hero images | `web/public/images/` | Replace `dentist-thumbs-up.webp`, `schedule-phone-mockup.webp`; then `npm run render:clips` to regenerate the poster stills |
 
 After editing, run `npm run build:web` and `npm run render:clips` (regenerates the animated hero poster from the same config).

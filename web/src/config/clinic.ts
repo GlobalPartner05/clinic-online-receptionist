@@ -17,6 +17,9 @@ export const CLINIC = {
   heroLead: 'for a healthier, brighter smile — book in minutes with our 24/7 AI receptionist.',
   welcome:
     'Mabuhay! I’m the Suyat Dental virtual receptionist. I can check slots, book, reschedule or cancel — anytime. How can I help?',
+  receptionistName: 'Suyat Assistant',   // the mascot's name in the UI
+  receptionistImage: '/images/receptionist.webp',
+  receptionistImageSmall: '/images/receptionist-128.webp',
   sessionKey: 'suyat_session_id',  // localStorage key for the chat session
   csvPrefix: 'suyat',              // admin CSV export file name prefix
 } as const;
