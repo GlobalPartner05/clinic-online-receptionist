@@ -1,72 +1,72 @@
-import { BRANCHES, CLINIC, SERVICES } from '../config/clinic';
-import { RemotionClip, type Clip } from './RemotionPlayer';
-import { Reveal } from './Reveal';
+import { BRANCHES, CLINIC, SERVICES, STEPS } from '../config/clinic';
+import { Link } from 'react-router-dom';
 import { Logo } from './Logo';
+import { Reveal } from './Reveal';
 
-export const HERO_CLIP: Clip = {
-  id: 'HeroReel',
-  width: 1280,
-  height: 720,
-  poster: '/images/posters/hero.webp',
-  alt: `Animated ${CLINIC.name} introduction: ${CLINIC.tagline}.`,
-};
-export const STEPS_CLIP: Clip = {
-  id: 'BookingSteps',
-  width: 1080,
-  height: 1080,
-  poster: '/images/schedule-phone-mockup.webp',
-  alt: 'Animation of booking an appointment by sending a message and receiving confirmation.',
-};
-
-export function Hero({ onBook }: { onBook: (prompt?: string) => void }) {
+export function Hero({ onBook }: { onBook: () => void }) {
   return (
     <section className="hero">
       <div className="container hero-grid">
         <div className="hero-copy">
-          <span className="pill">🕒 {CLINIC.badge}</span>
+          <span className="pill">{CLINIC.badge}</span>
           <h1>
             {CLINIC.headlineLead} <span className="accent">{CLINIC.headlineAccent}</span>
           </h1>
           <p className="lead">{CLINIC.heroLead}</p>
           <div className="hero-actions">
-            <button className="btn btn-primary" onClick={() => onBook()}>
+            <button className="btn btn-primary btn-lg" onClick={onBook}>
               Book an appointment
             </button>
-            <a className="btn btn-ghost" href="#services">
+            <a className="btn btn-ghost btn-lg" href="#services">
               Our services
             </a>
           </div>
+          <ul className="hero-facts" aria-label="At a glance">
+            <li><strong>2</strong> branches</li>
+            <li><strong>Mon–Sat</strong> appointments</li>
+            <li><strong>After-hours</strong> by arrangement</li>
+          </ul>
         </div>
-        <div className="hero-media">
-          <RemotionClip clip={HERO_CLIP} className="player-frame" />
+        <div className="hero-photo">
+          <img
+            src="/images/dentist-thumbs-up-1024.webp"
+            srcSet="/images/dentist-thumbs-up-640.webp 640w, /images/dentist-thumbs-up-1024.webp 1024w"
+            sizes="(max-width: 900px) 100vw, 55vw"
+            alt="Smiling dentist at the clinic giving a thumbs up"
+            width="1024"
+            height="861"
+            fetchPriority="high"
+          />
         </div>
       </div>
     </section>
   );
 }
 
-export function Services({ onBook }: { onBook: (prompt: string) => void }) {
+export function Services({ onPick }: { onPick: (service: string) => void }) {
   return (
     <section id="services" className="section">
       <div className="container">
         <Reveal>
-          <h2>Everything for your smile</h2>
-          <p className="section-sub">Tap a service to start booking with the receptionist.</p>
+          <h2>Our services</h2>
+          <p className="section-sub">Choose a service to start your booking.</p>
         </Reveal>
         <ul className="grid-3 service-grid">
           {SERVICES.map((s, i) => (
             <li key={s.id}>
-              <Reveal delay={i * 60}>
-                <button className="card service-card" onClick={() => onBook(s.prompt)} aria-label={`${s.title}: ${s.blurb} Start booking`}>
-                  <span className="service-num" aria-hidden>
-                    0{i + 1}
-                  </span>
-                  <span className="service-icon" aria-hidden>
-                    {s.icon}
-                  </span>
-                  <strong>{s.title}</strong>
-                  <span className="muted">{s.blurb}</span>
-                </button>
+              <Reveal delay={i * 50}>
+                <article className="card service-card">
+                  <div className="service-img">
+                    <img src={s.image} alt={s.imageAlt} width="570" height="492" loading="lazy" />
+                  </div>
+                  <div className="service-body">
+                    <h3><span className="service-num" aria-hidden>{String(i + 1).padStart(2, '0')}</span>{s.title}</h3>
+                    <p className="muted">{s.blurb}</p>
+                    <button className="btn btn-ghost btn-sm" onClick={() => onPick(s.id)} aria-label={`Book ${s.title}`}>
+                      Book this
+                    </button>
+                  </div>
+                </article>
               </Reveal>
             </li>
           ))}
@@ -79,18 +79,23 @@ export function Services({ onBook }: { onBook: (prompt: string) => void }) {
 export function HowItWorks() {
   return (
     <section id="how" className="section alt">
-      <div className="container how-grid">
+      <div className="container">
         <Reveal>
-          <RemotionClip clip={STEPS_CLIP} className="player-frame square" />
+          <h2>Book in three simple steps</h2>
         </Reveal>
-        <Reveal delay={100}>
-          <h2>Schedule in just a few easy steps</h2>
-          <ol className="steps">
-            <li><span>01</span>Find the branch closest to your location.</li>
-            <li><span>02</span>Send us a message here with your preferred schedule.</li>
-            <li><span>03</span>Wait for your booking confirmation from our team.</li>
-          </ol>
-        </Reveal>
+        <ol className="grid-3 steps-grid">
+          {STEPS.map((s, i) => (
+            <li key={s.n}>
+              <Reveal delay={i * 80}>
+                <div className="card step-card">
+                  <span className="step-n" aria-hidden>{s.n}</span>
+                  <h3>{s.title}</h3>
+                  <p className="muted">{s.text}</p>
+                </div>
+              </Reveal>
+            </li>
+          ))}
+        </ol>
       </div>
     </section>
   );
@@ -101,7 +106,8 @@ export function Branches() {
     <section id="branches" className="section">
       <div className="container">
         <Reveal>
-          <h2>Two branches, open after hours by arrangement</h2>
+          <h2>Our branches</h2>
+          <p className="section-sub">After-hours appointments are available by prior arrangement.</p>
         </Reveal>
         <div className="grid-2">
           {BRANCHES.map((b, i) => (
@@ -114,7 +120,6 @@ export function Branches() {
                   <br />
                   {b.hours}
                 </p>
-                <p className="muted small">After-hours appointments by prior arrangement.</p>
                 <a className="btn btn-ghost" target="_blank" rel="noopener noreferrer" href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(b.mapQuery)}`}>
                   Get directions ↗
                 </a>
@@ -133,6 +138,7 @@ export function Footer() {
       <div className="container footer-row">
         <Logo height={40} />
         <p className="muted small">© {new Date().getFullYear()} {CLINIC.name}. Appointments are confirmed by our team.</p>
+        <Link className="small footer-staff" to="/admin">Staff portal</Link>
       </div>
     </footer>
   );

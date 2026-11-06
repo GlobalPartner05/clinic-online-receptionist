@@ -6,7 +6,7 @@ An intelligent, full-stack clinic receptionist and patient appointment managemen
 
 ## 🌟 Features
 
-1. **24/7 AI Virtual Receptionist (`/`, React + Remotion frontend in `web/`)**
+1. **Online booking site (`/`, React frontend in `web/`) with a booking form and a virtual assistant**
    - Natural conversational appointment bookings, slot availability inquiries, cancellations, and rescheduling.
    - Dual-branch intelligence:
      - **San Nicolas, Pangasinan**: Monday – Tuesday (9:00 AM – 6:00 PM)

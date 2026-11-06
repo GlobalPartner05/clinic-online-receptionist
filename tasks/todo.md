@@ -61,3 +61,12 @@ Dead code
 - [x] `npm run deploy:bundled` -> dental-ai-assistant, version edbe0e5a (previous: 86395fd1). Verified active at 100% via API.
 - [ ] Live URL is behind Cloudflare Access (login redirect): owner must add a bypass/remove the policy for public use. Not changed by me.
 - [ ] Not set: BASE44_CONVERSATION_ID (Base44 tab falls back to local bot), VOICE_TOOL_SECRET (voice tool endpoint disabled: correct). Rotate leaked Base44 key.
+
+## Clean professional booking site (2026-11-06)
+- [x] Tooth mascot removed everywhere (avatar, floating button, hero video, call screen)
+- [x] Service emoji replaced by real images cropped from the owner's banner (web/public/images/services)
+- [x] Hero: large bold dentist photo (headline overlap + mobile stacking bugs found in screenshots and fixed)
+- [x] Booking form: /api/availability, /api/config, /api/book (+8 tests); validation, live slots, success with reference
+- [x] Primary buttons/links on accessible action colour (fixes the contrast findings)
+- [x] Chat is now a secondary helper; Base44 toggle and sound-wave strip removed from the page
+- [ ] Not done: rate limiting on /api/book and /api/chat; real-device voice test

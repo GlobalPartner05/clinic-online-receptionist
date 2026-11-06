@@ -18,6 +18,7 @@ import { handleIncomingCall, handleCallProcess } from './calls.js';
 
 import { handleVoiceTool } from './voice.js';
 import { hasEmbeddedSite, serveEmbedded } from './static.js';
+import { handleAvailability, handleBook, handleBookingConfig } from './booking.js';
 
 export { DentalAgent };
 
@@ -289,6 +290,16 @@ export default {
       request.method === 'POST'
     ) {
       return handleChat(request, env, ctx);
+    }
+
+    if (url.pathname === '/api/availability' && request.method === 'GET') {
+      return handleAvailability(request, env);
+    }
+    if (url.pathname === '/api/config' && request.method === 'GET') {
+      return handleBookingConfig();
+    }
+    if (url.pathname === '/api/book' && request.method === 'POST') {
+      return handleBook(request, env, ctx);
     }
 
     if (url.pathname === '/api/voice/tool' && request.method === 'POST') {

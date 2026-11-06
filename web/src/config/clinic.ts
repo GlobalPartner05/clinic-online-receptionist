@@ -14,38 +14,37 @@ export const CLINIC = {
   headlineLead: 'Comprehensive',
   headlineAccent: 'Dental Care',
   heroSubhead: 'for a Healthier, Brighter Smile',
-  heroLead: 'for a healthier, brighter smile — book in minutes with our 24/7 AI receptionist.',
+  heroLead: 'for a healthier, brighter smile. Book your appointment online in minutes.',
+  assistantTitle: 'Questions? Ask our virtual assistant',
   welcome:
-    'Mabuhay! I’m the Suyat Dental virtual receptionist. I can book, reschedule or cancel appointments and answer questions about our hours and services, anytime. Type, or tap the mic or Talk mode and just tell me what you need.',
-  receptionistName: 'Suyat Assistant',   // the mascot's name in the UI
-  receptionistImage: '/images/receptionist.webp',
-  receptionistImageSmall: '/images/receptionist-128.webp',
+    'Mabuhay! I’m the Suyat Dental virtual assistant. I can answer questions about our hours, branches and services, and help you book, reschedule or cancel. Type, or tap the mic and just tell me what you need.',
   sessionKey: 'suyat_session_id',  // localStorage key for the chat session
   csvPrefix: 'suyat',              // admin CSV export file name prefix
 } as const;
 
 export interface Service {
+  /** Value sent to the booking API (must match BOOKABLE_SERVICES on the server). */
   id: string;
   title: string;
   blurb: string;
-  icon: string;
-  /** Message sent to the receptionist; uses wording the chat parser understands. */
-  prompt: string;
+  /** Photo shown on the service card. */
+  image: string;
+  imageAlt: string;
 }
 
 export const SERVICES: Service[] = [
-  { id: 'cleaning', title: 'Cleaning & checkups', blurb: 'Routine examinations and preventive dental care.', icon: '🦷', prompt: 'I want to book a cleaning' },
-  { id: 'restorations', title: 'Restorations', blurb: 'Discuss fillings and other restorative treatment options.', icon: '👑', prompt: 'I want to book a filling' },
-  { id: 'braces', title: 'Braces & consultations', blurb: 'Explore orthodontic care and consultation options.', icon: '📐', prompt: 'I want to book a braces consultation' },
-  { id: 'whitening', title: 'Teeth whitening', blurb: 'Ask the dental team about whitening options.', icon: '✨', prompt: 'I want to book teeth whitening' },
-  { id: 'extractions', title: 'Extractions', blurb: 'Consult the clinic about extraction and surgical care.', icon: '🩺', prompt: 'I want to book an extraction' },
-  { id: 'concerns', title: 'Dental concerns', blurb: 'Contact the clinic directly for urgent dental needs.', icon: '🚨', prompt: 'I have a toothache and need an urgent appointment' },
+  { id: 'cleaning', title: 'Cleaning & checkups', blurb: 'Routine examinations and preventive dental care.', image: '/images/services/cleaning.webp', imageAlt: 'A healthy white tooth surrounded by a sparkling ring' },
+  { id: 'filling', title: 'Restorations', blurb: 'Discuss fillings and other restorative treatment options.', image: '/images/services/restorations.webp', imageAlt: 'A tooth with a gold crown' },
+  { id: 'braces', title: 'Braces & consultations', blurb: 'Explore orthodontic care and consultation options.', image: '/images/services/braces.webp', imageAlt: 'A dentist showing a patient a dental X-ray on a tablet' },
+  { id: 'whitening', title: 'Teeth whitening', blurb: 'Ask the dental team about whitening options.', image: '/images/services/whitening.webp', imageAlt: 'A smile shown before and after whitening' },
+  { id: 'extraction', title: 'Extractions', blurb: 'Consult the clinic about extraction and surgical care.', image: '/images/services/extractions.webp', imageAlt: 'Dental forceps lifting a tooth from the gum' },
+  { id: 'urgent dental concern', title: 'Dental concerns', blurb: 'Contact the clinic directly for urgent dental needs.', image: '/images/services/concerns.webp', imageAlt: 'A tooth with a red glow showing pain' },
 ];
 
 export const STEPS = [
-  { n: '01', text: 'Find the branch closest to your location.' },
-  { n: '02', text: 'Send us a message here with your preferred schedule.' },
-  { n: '03', text: 'Wait for your booking confirmation from our team.' },
+  { n: '01', title: 'Choose your visit', text: 'Pick the service you need and a date. We show the open times for the branch that day.' },
+  { n: '02', title: 'Enter your details', text: 'Give us your name and mobile number so our team can reach you about your visit.' },
+  { n: '03', title: 'Get your confirmation', text: 'You receive a booking reference and a printable proof of appointment right away.' },
 ] as const;
 
 export interface Branch {

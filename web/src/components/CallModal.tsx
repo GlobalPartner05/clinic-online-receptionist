@@ -3,7 +3,6 @@ import { CLINIC } from '../config/clinic';
 import { speak, stopSpeaking, useSpeechInput } from '../hooks/useSpeech';
 import { getSessionId } from '../hooks/useChat';
 import { RemotionClip, type Clip } from './RemotionPlayer';
-import { Receptionist } from './Receptionist';
 
 interface Line { who: 'you' | 'clinic'; text: string }
 
@@ -110,7 +109,6 @@ export function CallModal({ onClose }: { onClose: () => void }) {
     <div className="modal-backdrop" onMouseDown={(e) => e.target === e.currentTarget && close()}>
       <div ref={dlg} className="modal call" role="dialog" aria-modal="true" aria-labelledby="call-title">
         <h3 id="call-title">{CLINIC.name} — virtual call <span className="muted" aria-label={`Call time ${mm}:${ss}`}>{mm}:{ss}</span></h3>
-        <div className="call-face"><Receptionist size={112} state={mic.listening ? 'listening' : speaking ? 'speaking' : busy ? 'thinking' : 'idle'} /></div>
         <RemotionClip clip={wave} className="wave" />
         <div className="transcript" role="log" aria-live="polite">
           {lines.length === 0 && <p className="muted">Tap Speak and say what you need, for example “I want a cleaning next Monday”. I’ll listen again after each answer.</p>}
