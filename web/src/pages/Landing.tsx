@@ -2,12 +2,13 @@ import { useCallback, useState } from 'react';
 import { Header } from '../components/Header';
 import { Branches, Footer, Hero, HowItWorks, Services } from '../components/Sections';
 import { BookingForm } from '../components/BookingForm';
-import { ChatPanel } from '../components/ChatPanel';
-import { CLINIC } from '../config/clinic';
+import { ChatPopup } from '../components/ChatPopup';
+import { Mascot } from '../components/Mascot';
+import { AssistantProvider } from '../hooks/useAssistant';
 
 const smooth = () => (matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth');
 
-export default function Landing() {
+function LandingInner() {
   const [preselect, setPreselect] = useState<{ service: string; nonce: number } | null>(null);
 
   const goBook = useCallback(() => {
@@ -41,14 +42,18 @@ export default function Landing() {
         </section>
         <HowItWorks />
         <Branches />
-        <section id="assistant" className="section alt">
-          <div className="container assistant-wrap">
-            <h2 className="assistant-title">{CLINIC.assistantTitle}</h2>
-            <ChatPanel />
-          </div>
-        </section>
       </main>
       <Footer />
+      <ChatPopup />
+      <Mascot />
     </>
+  );
+}
+
+export default function Landing() {
+  return (
+    <AssistantProvider>
+      <LandingInner />
+    </AssistantProvider>
   );
 }

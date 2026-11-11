@@ -2,6 +2,7 @@ import { BRANCHES, CLINIC, SERVICES, STEPS } from '../config/clinic';
 import { Link } from 'react-router-dom';
 import { Logo } from './Logo';
 import { Reveal } from './Reveal';
+import { useAssistant } from '../hooks/useAssistant';
 
 export function Hero({ onBook }: { onBook: () => void }) {
   return (
@@ -133,11 +134,15 @@ export function Branches() {
 }
 
 export function Footer() {
+  const { paused, setPaused, still } = useAssistant();
   return (
     <footer className="footer">
       <div className="container footer-row">
         <Logo height={40} />
         <p className="muted small">© {new Date().getFullYear()} {CLINIC.name}. Appointments are confirmed by our team.</p>
+        <button type="button" className="link-btn small" aria-pressed={paused} onClick={() => setPaused(!paused)} disabled={still && !paused}>
+          {paused ? 'Resume chat icon motion' : 'Pause chat icon motion'}
+        </button>
         <Link className="small footer-staff" to="/admin">Staff portal</Link>
       </div>
     </footer>
